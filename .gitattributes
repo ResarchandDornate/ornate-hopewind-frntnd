@@ -1,0 +1,12 @@
+# Normalise line endings so Windows and Linux checkouts stay identical.
+* text=auto eol=lf
+
+# Shell scripts and Dockerfiles MUST keep LF or they break inside containers.
+*.sh text eol=lf
+Dockerfile text eol=lf
+entrypoint.sh text eol=lf
+
+# Binary assets — never touched.
+*.png binary
+*.jpg binary
+*.ico binary
