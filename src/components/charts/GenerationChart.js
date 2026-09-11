@@ -14,6 +14,7 @@ import {
 } from "recharts";
 
 import { EmptyState } from "@/components/ui";
+import { CHROME } from "@/lib/chartTheme";
 import { formatBucketLabel, formatEnergy, formatPower } from "@/lib/format";
 
 /**
@@ -47,23 +48,27 @@ export default function GenerationChart({ points = [], bucket = "hour", height =
     );
   }
 
-  const axisStyle = { fontSize: 11, fill: "#64748b" };
+  const axisStyle = { fontSize: 11, fill: CHROME.muted };
 
+  // A local variant of the shared tooltip: same tokens, tighter radius and a
+  // lighter shadow to suit the smaller chart this component renders.
   const tooltipProps = {
     contentStyle: {
       borderRadius: 12,
-      border: "1px solid #e2e8f0",
+      border: `1px solid ${CHROME.tooltipBorder}`,
+      background: CHROME.tooltipBg,
+      color: CHROME.ink,
       fontSize: 12,
-      boxShadow: "0 4px 16px rgba(15, 23, 42, 0.08)",
+      boxShadow: CHROME.tooltipShadow,
     },
-    labelStyle: { color: "#0f172a", fontWeight: 600 },
+    labelStyle: { color: CHROME.ink, fontWeight: 600 },
   };
 
   return (
     <ResponsiveContainer width="100%" height={height}>
       {showEnergy ? (
         <BarChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke={CHROME.grid} vertical={false} />
           <XAxis dataKey="label" tick={axisStyle} tickLine={false} axisLine={false} minTickGap={16} />
           <YAxis
             tick={axisStyle}
@@ -83,7 +88,7 @@ export default function GenerationChart({ points = [], bucket = "hour", height =
               <stop offset="100%" stopColor="#f97316" stopOpacity={0.02} />
             </linearGradient>
           </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke={CHROME.grid} vertical={false} />
           <XAxis dataKey="label" tick={axisStyle} tickLine={false} axisLine={false} minTickGap={24} />
           <YAxis
             tick={axisStyle}

@@ -56,10 +56,7 @@ export default function DeviceTable({ fleet = [], loading, compact = false }) {
           <tr className="border-b border-slate-200 text-left">
             {["Name", "Serial", "Location", "Status", "Power", "Temp", "Faults", "Last seen", ""].map(
               (heading) => (
-                <th
-                  key={heading}
-                  className="px-3 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500"
-                >
+                <th key={heading} className="hud-label px-3 py-3 text-[11px]">
                   {heading}
                 </th>
               )
@@ -75,7 +72,7 @@ export default function DeviceTable({ fleet = [], loading, compact = false }) {
                 className="border-b border-slate-100 transition last:border-0 hover:bg-slate-50/70"
               >
                 <td className="px-3 py-3 font-semibold text-slate-900">{device.name}</td>
-                <td className="px-3 py-3 font-mono text-xs text-slate-500">
+                <td className="readout px-3 py-3 text-xs text-slate-500">
                   {device.serial_number}
                 </td>
                 <td className="px-3 py-3">
@@ -84,22 +81,22 @@ export default function DeviceTable({ fleet = [], loading, compact = false }) {
                 <td className="px-3 py-3">
                   <StatusBadge status={device.status} />
                 </td>
-                <td className="px-3 py-3 tabular-nums text-slate-700">
+                <td className="readout px-3 py-3 text-slate-700">
                   {formatPower(device.power)}
                 </td>
-                <td className="px-3 py-3 tabular-nums text-slate-700">
+                <td className="readout px-3 py-3 text-slate-700">
                   {formatTemperature(device.temperature)}
                 </td>
                 <td className="px-3 py-3">
                   {faulted ? (
-                    <span className="rounded-md bg-red-50 px-2 py-1 font-mono text-[11px] font-semibold text-red-600">
+                    <span className="readout rounded-md bg-red-50 px-2 py-1 text-[11px] font-semibold text-red-600 ring-1 ring-red-100">
                       {device.hwFault ? "HW" : formatFaultBitmask(device.faultBitmask)}
                     </span>
                   ) : (
                     <span className="text-slate-400">—</span>
                   )}
                 </td>
-                <td className="px-3 py-3 text-xs text-slate-500">
+                <td className="readout px-3 py-3 text-xs text-slate-500">
                   {formatLastSeen(device.last_seen)}
                 </td>
                 <td className="px-3 py-3 text-right">

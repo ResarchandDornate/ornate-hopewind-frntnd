@@ -4,6 +4,8 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 
+import ThemeProvider, { useTheme } from "@/components/ThemeProvider";
+
 export default function Providers({ children }) {
   // Lazy-init so a single client instance is shared for the page load.
   const [queryClient] = useState(
@@ -23,8 +25,19 @@ export default function Providers({ children }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {children}
-      <Toaster position="top-center" richColors closeButton />
+      <ThemeProvider>
+        {children}
+        <ThemedToaster />
+      </ThemeProvider>
     </QueryClientProvider>
   );
+}
+
+/**
+ * Sonner paints its own surface, so it has to be told the theme explicitly -
+ * left on its default the toasts stay white on a dark dashboard.
+ */
+function ThemedToaster() {
+  const { theme } = useTheme();
+  return <Toaster position="top-center" theme={theme} richColors closeButton />;
 }

@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 import { EmptyState } from "@/components/ui";
-import { STATUS_COLORS, tooltipProps } from "@/lib/chartTheme";
+import { CHROME, STATUS_COLORS, tooltipProps } from "@/lib/chartTheme";
 
 /**
  * Fleet state at a glance.
@@ -55,7 +55,7 @@ export default function StatusDonut({ breakdown, height = 220 }) {
               // A 2px surface gap between segments, rather than a border drawn
               // around each one.
               paddingAngle={2}
-              stroke="#ffffff"
+              stroke={CHROME.surface}
               strokeWidth={2}
               isAnimationActive={false}
             >

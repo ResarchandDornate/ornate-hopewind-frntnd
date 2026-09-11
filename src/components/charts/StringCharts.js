@@ -16,7 +16,7 @@ import {
 } from "recharts";
 
 import { EmptyState } from "@/components/ui";
-import { SERIES_COLORS, axisProps, gridProps, legendProps, seriesColor, tooltipProps } from "@/lib/chartTheme";
+import { CHROME, SERIES_COLORS, axisProps, gridProps, legendProps, seriesColor, tooltipProps } from "@/lib/chartTheme";
 import { formatBucketLabel, formatNumber, formatPower } from "@/lib/format";
 
 /**
@@ -129,7 +129,7 @@ export function StringPowerBar({ strings = [], height = 200 }) {
           <YAxis {...axisProps} width={64} tickFormatter={(value) => formatPower(value)} />
           <Tooltip
             {...tooltipProps}
-            cursor={{ fill: "rgba(15, 23, 42, 0.04)" }}
+            cursor={{ fill: CHROME.cursorFill }}
             formatter={(value) => [formatPower(value), "Power"]}
           />
           <Bar dataKey="power" radius={[4, 4, 0, 0]} maxBarSize={56}>

@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff, Loader2, Lock, Mail, Phone, ShieldCheck, User } from "lucide-react";
 
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { CornerMarks } from "@/components/ui";
 import { postData } from "@/lib/api";
 import { storeSession } from "@/lib/auth";
 import { extractApiMessage, showError, showSuccess } from "@/lib/toast";
@@ -84,23 +86,36 @@ export default function SignupPage() {
   };
 
   const inputWrap =
-    "mb-4 flex items-center rounded-xl border border-white/70 bg-white/55 px-4 focus-within:border-orange-400";
+    "mb-4 flex items-center rounded-xl border border-white/70 bg-white/55 px-4 transition focus-within:border-orange-400 focus-within:shadow-[0_0_0_3px_rgba(249,115,22,0.15)]";
   const inputClass = "ml-3 flex-1 bg-transparent py-3 text-slate-800 outline-none";
 
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-8">
-      <div className="glass-strong w-full max-w-md rounded-3xl p-8">
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
+
+      <div className="glass-strong relative w-full max-w-md overflow-hidden rounded-3xl p-8">
+        <span
+          aria-hidden
+          className="absolute inset-x-8 top-0 h-px bg-linear-to-r from-transparent via-brand to-transparent"
+        />
+        <CornerMarks />
+
         <div className="mb-8 flex flex-col items-center text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/ornatelogo.png" alt="Ornate Solar" className="mb-4 h-14 w-auto object-contain" />
-          <h1 className="text-3xl font-bold text-slate-800">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-800">
             {step === "details" ? "Create Account" : "Verify Email"}
           </h1>
-          <p className="mt-2 text-slate-500">
-            {step === "details"
-              ? "Register for the Krishna Box portal"
-              : `We sent a 6-digit code to ${form.email}`}
+          <p className="hud-label mt-2">
+            {step === "details" ? "Krishna Box Portal · Registration" : "Identity Verification"}
           </p>
+          {step === "otp" && (
+            <p className="mt-2 text-sm text-slate-500">
+              We sent a 6-digit code to <span className="readout text-slate-700">{form.email}</span>
+            </p>
+          )}
         </div>
 
         {step === "details" ? (
@@ -164,7 +179,7 @@ export default function SignupPage() {
               <button
                 type="button"
                 onClick={() => setShowPassword((current) => !current)}
-                className="text-slate-500"
+                className="text-slate-500 transition hover:text-slate-700"
                 tabIndex={-1}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
@@ -175,7 +190,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="mt-2 flex w-full items-center justify-center rounded-xl bg-linear-to-r from-orange-500 to-red-600 py-4 text-lg font-bold text-white transition hover:opacity-95 disabled:opacity-60"
+              className="mt-2 flex w-full items-center justify-center rounded-xl bg-linear-to-r from-orange-500 to-red-600 py-4 text-base font-bold uppercase tracking-[0.12em] text-white shadow-[0_8px_28px_-8px_rgba(249,115,22,0.8)] transition hover:opacity-95 disabled:opacity-60 dark:to-red-500"
             >
               {loading ? <Loader2 className="animate-spin" /> : "Create Account"}
             </button>
@@ -197,14 +212,14 @@ export default function SignupPage() {
                 placeholder="6-digit code"
                 inputMode="numeric"
                 autoComplete="one-time-code"
-                className={`${inputClass} tracking-[0.4em]`}
+                className={`${inputClass} readout text-lg tracking-[0.4em]`}
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center rounded-xl bg-linear-to-r from-orange-500 to-red-600 py-4 text-lg font-bold text-white transition hover:opacity-95 disabled:opacity-60"
+              className="flex w-full items-center justify-center rounded-xl bg-linear-to-r from-orange-500 to-red-600 py-4 text-base font-bold uppercase tracking-[0.12em] text-white shadow-[0_8px_28px_-8px_rgba(249,115,22,0.8)] transition hover:opacity-95 disabled:opacity-60 dark:to-red-500"
             >
               {loading ? <Loader2 className="animate-spin" /> : "Verify & Continue"}
             </button>

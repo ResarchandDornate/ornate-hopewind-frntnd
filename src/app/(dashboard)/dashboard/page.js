@@ -198,10 +198,10 @@ function SummaryTile({ icon: Icon, label, value, unit }) {
         <Icon size={20} className="text-slate-600" />
       </div>
       <div className="min-w-0">
-        <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">{label}</p>
-        <p className="truncate text-lg font-bold text-slate-900">
+        <p className="hud-label">{label}</p>
+        <p className="readout mt-0.5 truncate text-lg font-bold text-slate-900">
           {value}
-          {unit ? <span className="ml-1 text-sm font-medium text-slate-500">{unit}</span> : null}
+          {unit ? <span className="ml-1 text-sm font-semibold text-slate-500">{unit}</span> : null}
         </p>
       </div>
     </div>

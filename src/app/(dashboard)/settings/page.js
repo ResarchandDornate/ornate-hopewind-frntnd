@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Database, KeyRound, Radio, User } from "lucide-react";
 
 import { useShell } from "@/components/ShellContext";
+import { ThemePicker } from "@/components/ThemeToggle";
 import Topbar from "@/components/Topbar";
 import { Card, PageBody } from "@/components/ui";
 import { postData } from "@/lib/api";
@@ -101,6 +102,19 @@ export default function SettingsPage() {
           </Card>
         </div>
 
+        <Card title="Appearance" subtitle="Applies to this browser only">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-slate-700">Colour theme</p>
+              <p className="mt-0.5 text-xs text-slate-500">
+                Dark suits a control room or a night shift; System follows your
+                operating system and switches with it.
+              </p>
+            </div>
+            <ThemePicker />
+          </div>
+        </Card>
+
         <ChangePasswordCard />
       </PageBody>
     </>
@@ -154,7 +168,7 @@ function ChangePasswordCard() {
   };
 
   const inputClass =
-    "w-full rounded-xl border border-white/70 bg-white/55 px-4 py-2.5 text-sm outline-none focus:border-orange-400";
+    "w-full rounded-xl border border-white/70 bg-white/55 px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-orange-400";
 
   return (
     <Card title="Change password" subtitle="You will stay signed in on this device">
@@ -197,7 +211,7 @@ function ChangePasswordCard() {
           <button
             type="submit"
             disabled={saving || !oldPassword || !newPassword}
-            className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:opacity-50"
+            className="rounded-xl bg-solid px-5 py-2.5 text-sm font-semibold text-on-solid transition hover:opacity-90 disabled:opacity-50"
           >
             {saving ? "Saving…" : "Update password"}
           </button>

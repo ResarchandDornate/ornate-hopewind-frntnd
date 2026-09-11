@@ -41,19 +41,34 @@ export const STATUS_COLORS = {
   unknown: "#898781",
 };
 
-/** Single-hue ramp for magnitude (heatmaps). Light → dark, never a rainbow. */
+/**
+ * Single-hue ramp for magnitude (heatmaps). Light → dark, never a rainbow.
+ * This is the light-theme source of truth; consumers should use HEAT_RAMP
+ * below, which addresses the same steps through theme-aware variables.
+ */
 export const SEQUENTIAL_BLUE = [
   "#cde2fb", "#b7d3f6", "#9ec5f4", "#86b6ef",
   "#6da7ec", "#5598e7", "#3987e5", "#2a78d6",
   "#256abf", "#1c5cab", "#184f95", "#104281",
 ];
 
+/**
+ * Chrome reads from CSS variables rather than literals so a theme flip repaints
+ * the charts with no React involvement — SVG presentation attributes resolve
+ * var() the same way any other property does, and Recharts passes these
+ * straight through. The light/dark values live in app/globals.css.
+ */
 export const CHROME = {
-  grid: "#e1e0d9",
-  axis: "#c3c2b7",
-  muted: "#898781",
-  ink: "#0b0b0b",
-  surface: "#ffffff",
+  grid: "var(--chart-grid)",
+  axis: "var(--chart-axis)",
+  muted: "var(--chart-muted)",
+  ink: "var(--chart-ink)",
+  surface: "var(--chart-surface)",
+  cursorFill: "var(--chart-cursor-fill)",
+  empty: "var(--chart-empty)",
+  tooltipBg: "var(--chart-tooltip-bg)",
+  tooltipBorder: "var(--chart-tooltip-border)",
+  tooltipShadow: "var(--chart-tooltip-shadow)",
 };
 
 /** Recessive hairline axis styling, shared by every chart. */
@@ -74,14 +89,15 @@ export const gridProps = {
 export const tooltipProps = {
   contentStyle: {
     borderRadius: 14,
-    border: "1px solid rgba(255,255,255,0.7)",
+    border: "1px solid var(--chart-tooltip-border)",
     // Near-opaque on purpose: a tooltip has to stay readable over whatever
     // marks sit behind it, so it gets more fill than the panels do.
-    background: "rgba(255,255,255,0.92)",
+    background: "var(--chart-tooltip-bg)",
     backdropFilter: "blur(12px)",
     WebkitBackdropFilter: "blur(12px)",
     fontSize: 12,
-    boxShadow: "0 8px 28px rgba(15, 23, 42, 0.12)",
+    boxShadow: "var(--chart-tooltip-shadow)",
+    color: CHROME.ink,
   },
   labelStyle: { color: CHROME.ink, fontWeight: 600 },
   // A wider crosshair band than the mark, so hovering a thin line is not a
@@ -90,15 +106,22 @@ export const tooltipProps = {
 };
 
 export const legendProps = {
-  wrapperStyle: { fontSize: 12, paddingTop: 4 },
+  wrapperStyle: { fontSize: 12, paddingTop: 4, color: CHROME.muted },
 };
+
+/**
+ * The same ramp addressed through CSS variables, so the heatmap can invert its
+ * direction between themes: pale-to-saturated on white reads as more, but on a
+ * dark panel the pale end is the loudest cell on the grid.
+ */
+export const HEAT_RAMP = SEQUENTIAL_BLUE.map((_, index) => `var(--heat-${index})`);
 
 /** Map a 0..1 magnitude onto the sequential ramp. */
 export function sequentialStep(fraction) {
   if (fraction === null || fraction === undefined || Number.isNaN(fraction)) {
-    return "#f1f5f9";
+    return CHROME.empty;
   }
   const clamped = Math.max(0, Math.min(1, fraction));
-  const index = Math.round(clamped * (SEQUENTIAL_BLUE.length - 1));
-  return SEQUENTIAL_BLUE[index];
+  const index = Math.round(clamped * (HEAT_RAMP.length - 1));
+  return HEAT_RAMP[index];
 }

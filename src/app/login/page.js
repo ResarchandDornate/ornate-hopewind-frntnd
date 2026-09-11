@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2, Lock, Mail } from "lucide-react";
 
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { CornerMarks } from "@/components/ui";
 import { postData } from "@/lib/api";
 import { storeSession } from "@/lib/auth";
 import { extractApiMessage, showError, showSuccess } from "@/lib/toast";
@@ -39,21 +41,39 @@ export default function LoginPage() {
     }
   };
 
+  const fieldClass =
+    "flex items-center rounded-xl border border-white/70 bg-white/55 px-4 transition focus-within:border-orange-400 focus-within:shadow-[0_0_0_3px_rgba(249,115,22,0.15)]";
+
   return (
     <div className="flex min-h-screen items-center justify-center px-4 py-8">
-      <form onSubmit={handleLogin} className="glass-strong w-full max-w-md rounded-3xl p-8">
+      {/* Theme switch before sign-in: whoever opens this on a wall display
+          should not have to authenticate first to turn the lights down. */}
+      <div className="absolute right-4 top-4">
+        <ThemeToggle />
+      </div>
+
+      <form
+        onSubmit={handleLogin}
+        className="glass-strong relative w-full max-w-md overflow-hidden rounded-3xl p-8"
+      >
+        <span
+          aria-hidden
+          className="absolute inset-x-8 top-0 h-px bg-linear-to-r from-transparent via-brand to-transparent"
+        />
+        <CornerMarks />
+
         <div className="mb-8 flex flex-col items-center text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/ornatelogo.png" alt="Ornate Solar" className="mb-4 h-14 w-auto object-contain" />
-          <h1 className="text-3xl font-bold text-slate-800">Krishna Box</h1>
-          <p className="mt-2 text-slate-500">Sign in to your monitoring portal</p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-800">Krishna Box</h1>
+          <p className="hud-label mt-2">Monitoring Portal · Secure Access</p>
         </div>
 
-        <label htmlFor="email" className="mb-2 block text-sm font-semibold text-slate-700">
+        <label htmlFor="email" className="hud-label mb-2 block">
           Email
         </label>
-        <div className="mb-4 flex items-center rounded-xl border border-white/70 bg-white/55 px-4 focus-within:border-orange-400">
-          <Mail size={20} className="text-slate-400" />
+        <div className={`mb-4 ${fieldClass}`}>
+          <Mail size={18} className="text-slate-400" />
           <input
             id="email"
             type="email"
@@ -65,11 +85,11 @@ export default function LoginPage() {
           />
         </div>
 
-        <label htmlFor="password" className="mb-2 block text-sm font-semibold text-slate-700">
+        <label htmlFor="password" className="hud-label mb-2 block">
           Password
         </label>
-        <div className="mb-6 flex items-center rounded-xl border border-white/70 bg-white/55 px-4 focus-within:border-orange-400">
-          <Lock size={20} className="text-slate-400" />
+        <div className={`mb-6 ${fieldClass}`}>
+          <Lock size={18} className="text-slate-400" />
           <input
             id="password"
             type={showPassword ? "text" : "password"}
@@ -82,18 +102,18 @@ export default function LoginPage() {
           <button
             type="button"
             onClick={() => setShowPassword((current) => !current)}
-            className="text-slate-500"
+            className="text-slate-500 transition hover:text-slate-700"
             tabIndex={-1}
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
-            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="flex w-full items-center justify-center rounded-xl bg-linear-to-r from-orange-500 to-red-600 py-4 text-lg font-bold text-white transition hover:opacity-95 disabled:opacity-60"
+          className="flex w-full items-center justify-center rounded-xl bg-linear-to-r from-orange-500 to-red-600 py-4 text-base font-bold uppercase tracking-[0.12em] text-white shadow-[0_8px_28px_-8px_rgba(249,115,22,0.8)] transition hover:opacity-95 disabled:opacity-60 dark:to-red-500"
         >
           {loading ? <Loader2 className="animate-spin" /> : "Sign In"}
         </button>

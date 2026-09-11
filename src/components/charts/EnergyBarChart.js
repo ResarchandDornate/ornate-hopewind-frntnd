@@ -64,7 +64,7 @@ export default function EnergyBarChart({ points = [], period = "day", height = 3
         <YAxis {...axisProps} width={68} tickFormatter={(value) => formatEnergy(value, 0)} />
         <Tooltip
           {...tooltipProps}
-          cursor={{ fill: "rgba(15, 23, 42, 0.04)" }}
+          cursor={{ fill: CHROME.cursorFill }}
           formatter={(value) => [formatEnergy(value), "Energy"]}
         />
         {/* 4px rounded data-end, anchored to the baseline. */}

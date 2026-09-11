@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { format, parseISO } from "date-fns";
 
 import { EmptyState } from "@/components/ui";
-import { SEQUENTIAL_BLUE, sequentialStep } from "@/lib/chartTheme";
+import { CHROME, HEAT_RAMP, sequentialStep } from "@/lib/chartTheme";
 import { formatEnergy } from "@/lib/format";
 
 /**
@@ -96,10 +96,10 @@ export default function GenerationHeatmap({ aggregates = [] }) {
                     aria-label={`${format(parseISO(day), "dd MMM")} ${String(hour).padStart(2, "0")}:00 — ${formatEnergy(value)}`}
                     title={`${format(parseISO(day), "dd MMM")} ${String(hour).padStart(2, "0")}:00 · ${formatEnergy(value)}`}
                     className={`h-5 flex-1 rounded-[3px] transition ${
-                      isHovered ? "ring-2 ring-slate-900 ring-offset-1" : ""
+                      isHovered ? "ring-2 ring-slate-900 ring-offset-1 ring-offset-[var(--surface-solid)]" : ""
                     }`}
                     style={{
-                      background: value > 0 ? sequentialStep(fraction) : "#f1f5f9",
+                      background: value > 0 ? sequentialStep(fraction) : CHROME.empty,
                     }}
                   />
                 );
@@ -114,9 +114,9 @@ export default function GenerationHeatmap({ aggregates = [] }) {
         <div className="flex items-center gap-2">
           <span className="text-[11px] text-slate-500">Less</span>
           <div className="flex gap-[2px]">
-            <div className="h-3 w-4 rounded-[2px]" style={{ background: "#f1f5f9" }} />
-            {SEQUENTIAL_BLUE.filter((_, index) => index % 2 === 0).map((color) => (
-              <div key={color} className="h-3 w-4 rounded-[2px]" style={{ background: color }} />
+            <div className="h-3 w-4 rounded-[2px]" style={{ background: CHROME.empty }} />
+            {HEAT_RAMP.filter((_, index) => index % 2 === 0).map((step) => (
+              <div key={step} className="h-3 w-4 rounded-[2px]" style={{ background: step }} />
             ))}
           </div>
           <span className="text-[11px] text-slate-500">

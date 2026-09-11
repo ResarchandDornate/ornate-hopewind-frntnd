@@ -1,9 +1,24 @@
 @import "tailwindcss";
 
+/* Class-based dark mode. The default `dark:` variant in Tailwind v4 follows
+   prefers-color-scheme only, which cannot express "the user overrode the OS". */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
+  /* Geist Mono is loaded by the root layout but Tailwind's `font-mono` points
+     at the system stack, so every `font-mono` in the app was falling back to
+     Consolas. Wiring it here puts the real face on serials, fault codes and
+     instrument readouts - the places where a fixed advance width is the point. */
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, Consolas,
+    "Liberation Mono", monospace;
+
   /* Ornate Solar brand palette - orange primary on a deep navy shell. */
   --color-brand: #f4801f;
   --color-brand-dark: #c2610f;
+  /* Ink for text sitting ON brand orange. White only reaches 2.8:1 there;
+     this deep burnt tone clears AA at 6.7:1 and keeps the fill vivid instead
+     of forcing the orange darker to rescue a white label. */
+  --color-on-brand: #2b1200;
   --color-ink: #0f172a;
   --color-muted: #64748b;
   --color-canvas: #f8fafc;
@@ -11,9 +26,23 @@
   --color-good: #16a34a;
   --color-warn: #f59e0b;
   --color-danger: #dc2626;
+
+  /* Chrome accent. Deliberately NOT a data colour: it marks live state, focus
+     and selection only. Keeping it out of the chart palette is what stops a
+     cyan-lit UI from implying a cyan series. */
+  --color-accent: #22d3ee;
+  --color-accent-soft: #67e8f9;
+
+  /* High-contrast solid button pair. Its own token because the theme has to
+     flip both halves together: a fill built from `bg-slate-900` + `text-white`
+     would invert its background but not its label. */
+  --color-solid: #0f172a;
+  --color-on-solid: #ffffff;
 }
 
 :root {
+  color-scheme: light;
+
   --background: #f4f7fb;
   --foreground: #0f172a;
 
@@ -27,6 +56,262 @@
   --glass-ring: rgba(15, 23, 42, 0.06);
   --glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
   --glass-blur: 16px;
+  /* The top-edge highlight that sells the bevel. Much weaker in dark mode, so
+     it is a token rather than a literal inside .glass. */
+  --glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  --glass-inset-strong: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --glass-hover-shadow: 0 12px 40px rgba(15, 23, 42, 0.12);
+  /* A gradient wash laid over the fill. Off in light mode - a white panel with
+     a white sheen is just noise - and carrying the top-lit look in dark. */
+  --glass-sheen: none;
+  --glass-hover-border: rgba(255, 255, 255, 0.9);
+
+  /* Opaque stand-ins used when transparency is unavailable or unwanted. */
+  --surface-solid: #ffffff;
+  --surface-solid-dark: #0d1629;
+  --border-solid: #e2e8f0;
+  --background-flat: #f4f7fb;
+
+  /* Ambient wash stops. */
+  --ambient-warm: rgba(244, 128, 31, 0.16);
+  --ambient-cool: rgba(42, 120, 214, 0.14);
+  --ambient-green: rgba(27, 175, 122, 0.1);
+  --ambient-base: linear-gradient(180deg, #f7f9fc 0%, #eef3f9 100%);
+  /* Engineering grid over the wash. Barely there on white, where the paper
+     already reads as a surface; it does the heavy lifting in dark. */
+  --grid-line: rgba(15, 23, 42, 0.035);
+  --grid-size: 56px;
+  /* `none`, not `transparent`: this lands in a background-image list, and a
+     colour there is invalid and would drop the grid layers with it. */
+  --vignette: none;
+
+  /* Translucent white is the surface idiom across the app (`bg-white/55`,
+     `border-white/70`). Routed through tokens so the dark theme can swap the
+     whole family without every panel needing a `dark:` twin. */
+  --sheet-subtle: rgba(255, 255, 255, 0.55);
+  --sheet: rgba(255, 255, 255, 0.65);
+  --sheet-raised: rgba(255, 255, 255, 0.85);
+  --sheet-hover: rgba(255, 255, 255, 0.6);
+  --hairline: rgba(255, 255, 255, 0.65);
+
+  --scrollbar-thumb: rgba(148, 163, 184, 0.15);
+  --scrollbar-thumb-hover: rgba(148, 163, 184, 0.5);
+
+  /* Focus and selection both run on the chrome accent, dimmed for white. */
+  --focus-ring: rgba(14, 116, 144, 0.55);
+  --selection-bg: rgba(34, 211, 238, 0.28);
+  --selection-fg: #0f172a;
+
+  /* Instrument chrome: the halo behind a live status dot, and the bloom on
+     the active nav item. */
+  --dot-glow-strength: 0.22;
+  --nav-active-fill: rgba(249, 115, 22, 0.14);
+  --nav-active-glow: 0 0 18px rgba(249, 115, 22, 0.18);
+
+  /* Chart chrome. Charts draw into SVG, so these are consumed as `var()`
+     strings from lib/chartTheme.js rather than as Tailwind utilities - that
+     keeps them reactive to a theme flip without re-rendering Recharts. */
+  --chart-grid: #e1e0d9;
+  --chart-axis: #c3c2b7;
+  --chart-muted: #898781;
+  --chart-ink: #0b0b0b;
+  --chart-surface: #ffffff;
+  --chart-tooltip-bg: rgba(255, 255, 255, 0.92);
+  --chart-tooltip-border: rgba(255, 255, 255, 0.7);
+  --chart-tooltip-shadow: 0 8px 28px rgba(15, 23, 42, 0.12);
+  --chart-cursor-fill: rgba(15, 23, 42, 0.04);
+  --chart-empty: #f1f5f9;
+
+  /* Single-hue sequential ramp for the generation heatmap. The light theme
+     runs pale to saturated; the dark theme runs dark to bright, because "more"
+     has to mean "further from the background" in both. */
+  --heat-0: #cde2fb;
+  --heat-1: #b7d3f6;
+  --heat-2: #9ec5f4;
+  --heat-3: #86b6ef;
+  --heat-4: #6da7ec;
+  --heat-5: #5598e7;
+  --heat-6: #3987e5;
+  --heat-7: #2a78d6;
+  --heat-8: #256abf;
+  --heat-9: #1c5cab;
+  --heat-10: #184f95;
+  --heat-11: #104281;
+}
+
+/* ---------------------------------------------------------------------------
+   Dark theme - the primary design target.
+
+   Almost all of this is a remap of the Tailwind neutral ramp rather than a
+   parallel set of `dark:` utilities. Tailwind v4 compiles `text-slate-500` to
+   `color: var(--color-slate-500)`, so redefining the ramp here re-themes every
+   one of the ~190 neutral utilities in the app at once, and any component
+   added later inherits the behaviour for free.
+
+   The ramp is inverted by ROLE, not by arithmetic: 50-200 are fills and
+   hairlines, 400-900 are text and step up towards white. Where one token is
+   read in both roles (`bg-slate-900` as a button fill vs `text-slate-900` as a
+   heading) the few affected sites use the explicit `solid` / `on-solid` pair.
+
+   The neutrals carry a deliberate blue cast rather than sitting on true grey.
+   On a monitoring wall that reads as instrumentation instead of as a dimmed
+   document, and it lets the brand orange stay the warmest thing on screen.
+--------------------------------------------------------------------------- */
+.dark {
+  color-scheme: dark;
+
+  --background: #050810;
+  --foreground: #e6edf8;
+
+  /* 50-200 are fills, tracks and hairlines. They have to sit just ABOVE the
+     panel (~#0e1626) rather than below it: a divider darker than its surface
+     disappears on a dark theme, where on white it would have read as a line. */
+  --color-slate-50: #16203a;
+  --color-slate-100: #1e2b48;
+  --color-slate-200: #2d3d61;
+  --color-slate-300: #8b9cba;
+  --color-slate-400: #7c8ca8;
+  --color-slate-500: #97a7c2;
+  --color-slate-600: #b1bfd6;
+  --color-slate-700: #cbd6e7;
+  --color-slate-800: #e0e8f4;
+  --color-slate-900: #f2f6fc;
+
+  /* Tinted status chips. Translucent rather than flat so they still read as a
+     tint when they sit on a glass panel over the ambient gradient. */
+  --color-red-50: rgba(239, 68, 68, 0.15);
+  --color-red-100: rgba(239, 68, 68, 0.3);
+  --color-red-200: rgba(239, 68, 68, 0.36);
+  --color-red-600: #fca5a5;
+  --color-red-700: #fca5a5;
+  --color-green-50: rgba(34, 197, 94, 0.15);
+  --color-green-100: rgba(34, 197, 94, 0.3);
+  --color-green-600: #6ee7b7;
+  --color-green-700: #6ee7b7;
+  --color-blue-50: rgba(59, 130, 246, 0.16);
+  --color-blue-100: rgba(59, 130, 246, 0.3);
+  --color-blue-600: #93c5fd;
+  --color-blue-700: #93c5fd;
+  --color-amber-50: rgba(245, 158, 11, 0.16);
+  --color-amber-100: rgba(245, 158, 11, 0.3);
+  --color-amber-600: #fcd34d;
+  --color-amber-700: #fcd34d;
+  --color-orange-50: rgba(249, 115, 22, 0.16);
+  --color-orange-100: rgba(249, 115, 22, 0.3);
+  --color-orange-600: #fdba74;
+  --color-orange-700: #fed7aa;
+  --color-indigo-50: rgba(99, 102, 241, 0.16);
+  --color-indigo-100: rgba(99, 102, 241, 0.3);
+  --color-indigo-600: #a5b4fc;
+
+  --color-solid: #f2f6fc;
+  --color-on-solid: #080d18;
+
+  /* Panels read as smoked glass over the grid rather than as flat cards: the
+     fill stays translucent so the ambient wash and the grid show through, and
+     the sheen puts a light source above the layout. */
+  --glass-fill: rgba(16, 24, 42, 0.68);
+  --glass-fill-strong: rgba(16, 24, 42, 0.86);
+  --glass-border: rgba(125, 170, 235, 0.14);
+  --glass-ring: rgba(125, 170, 235, 0.12);
+  --glass-shadow: 0 10px 34px rgba(0, 0, 0, 0.5);
+  --glass-inset: inset 0 1px 0 rgba(190, 220, 255, 0.09);
+  --glass-inset-strong: inset 0 1px 0 rgba(190, 220, 255, 0.13);
+  --glass-hover-shadow: 0 14px 44px rgba(0, 0, 0, 0.6);
+  --glass-sheen: linear-gradient(
+    180deg,
+    rgba(125, 170, 235, 0.07) 0%,
+    rgba(125, 170, 235, 0) 42%
+  );
+  --glass-hover-border: rgba(125, 170, 235, 0.28);
+
+  --surface-solid: #101828;
+  --surface-solid-dark: #080e1c;
+  --border-solid: #2d3d61;
+  --background-flat: #050810;
+
+  /* Tighter, more saturated aurora than the light theme: on black the wash has
+     to be visible enough to give the glass something to refract. */
+  --ambient-warm: rgba(249, 115, 22, 0.2);
+  --ambient-cool: rgba(34, 211, 238, 0.16);
+  --ambient-green: rgba(27, 175, 122, 0.11);
+  --ambient-base: linear-gradient(180deg, #070c18 0%, #04070e 100%);
+  --grid-line: rgba(125, 170, 235, 0.055);
+  --grid-size: 56px;
+  --vignette: radial-gradient(120% 90% at 50% 0%, transparent 42%, rgba(0, 0, 0, 0.55) 100%);
+
+  --sheet-subtle: rgba(125, 170, 235, 0.05);
+  --sheet: rgba(125, 170, 235, 0.07);
+  --sheet-raised: rgba(16, 24, 42, 0.94);
+  --sheet-hover: rgba(125, 170, 235, 0.1);
+  --hairline: rgba(125, 170, 235, 0.14);
+
+  --scrollbar-thumb: rgba(125, 170, 235, 0.16);
+  --scrollbar-thumb-hover: rgba(125, 170, 235, 0.45);
+
+  --focus-ring: rgba(34, 211, 238, 0.75);
+  --selection-bg: rgba(34, 211, 238, 0.3);
+  --selection-fg: #f2f6fc;
+
+  --dot-glow-strength: 0.55;
+  --nav-active-fill: rgba(249, 115, 22, 0.16);
+  --nav-active-glow: 0 0 22px rgba(249, 115, 22, 0.3);
+
+  --chart-grid: rgba(125, 170, 235, 0.09);
+  --chart-axis: rgba(125, 170, 235, 0.22);
+  --chart-muted: #97a7c2;
+  --chart-ink: #f2f6fc;
+  --chart-surface: #101828;
+  --chart-tooltip-bg: rgba(12, 19, 34, 0.95);
+  --chart-tooltip-border: rgba(125, 170, 235, 0.2);
+  --chart-tooltip-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  --chart-cursor-fill: rgba(125, 170, 235, 0.07);
+  --chart-empty: rgba(125, 170, 235, 0.05);
+
+  --heat-0: #101f38;
+  --heat-1: #12294a;
+  --heat-2: #13325c;
+  --heat-3: #143c70;
+  --heat-4: #134786;
+  --heat-5: #10529c;
+  --heat-6: #115fb3;
+  --heat-7: #1d6dc8;
+  --heat-8: #357ed6;
+  --heat-9: #5293e2;
+  --heat-10: #74a9ec;
+  --heat-11: #9cc3f5;
+}
+
+/* The navigation rail is dark in BOTH themes, so the inverted neutrals would
+   paint dark text onto a dark panel. Restoring the light-theme ramp inside it
+   keeps `text-slate-300` and friends meaning what the markup says they mean. */
+.dark .glass-dark {
+  --color-slate-300: #cbd5e1;
+  --color-slate-400: #94a3b8;
+  --color-slate-500: #7c8ca8;
+}
+
+/* Surface utilities written as translucent white. Redefining --color-white
+   globally is not an option - `text-white` on the brand gradient and on the
+   orange avatar has to stay white - so the handful of white *surfaces* are
+   retargeted here instead. */
+.dark .bg-white\/50,
+.dark .bg-white\/55,
+.dark .bg-white\/60,
+.dark .bg-white\/65 {
+  background-color: var(--sheet-subtle);
+}
+.dark .bg-white,
+.dark .bg-white\/80,
+.dark .bg-white\/85 {
+  background-color: var(--sheet-raised);
+}
+.dark .hover\:bg-white\/60:hover {
+  background-color: var(--sheet-hover);
+}
+.dark .border-white\/60,
+.dark .border-white\/70 {
+  border-color: var(--hairline);
 }
 
 body {
@@ -34,6 +319,19 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, Arial, Helvetica, sans-serif;
   min-height: 100vh;
+}
+
+::selection {
+  background: var(--selection-bg);
+  color: var(--selection-fg);
+}
+
+/* One focus treatment for the whole app. Keyboard-only, so a mouse user never
+   sees a ring on a button they just clicked. */
+:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* Ambient wash behind the glass. Without something to refract, a blurred
@@ -44,46 +342,147 @@ body {
   content: "";
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: -2;
   pointer-events: none;
   background:
-    radial-gradient(48rem 48rem at 8% -10%, rgba(244, 128, 31, 0.16), transparent 60%),
-    radial-gradient(40rem 40rem at 96% 4%, rgba(42, 120, 214, 0.14), transparent 62%),
-    radial-gradient(46rem 46rem at 52% 108%, rgba(27, 175, 122, 0.1), transparent 60%),
-    linear-gradient(180deg, #f7f9fc 0%, #eef3f9 100%);
+    radial-gradient(48rem 48rem at 8% -10%, var(--ambient-warm), transparent 60%),
+    radial-gradient(40rem 40rem at 96% 4%, var(--ambient-cool), transparent 62%),
+    radial-gradient(46rem 46rem at 52% 108%, var(--ambient-green), transparent 60%),
+    var(--ambient-base);
+}
+
+/* Engineering grid + vignette, one layer above the wash. The grid is what
+   turns a dark gradient into an instrument surface; the mask fades it out down
+   the page so it never competes with the panels sitting on top of it. */
+.ambient-bg::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px),
+    var(--vignette);
+  background-size: var(--grid-size) var(--grid-size), var(--grid-size) var(--grid-size), cover;
+  mask-image: radial-gradient(140% 100% at 50% 0%, #000 30%, transparent 92%);
+  -webkit-mask-image: radial-gradient(140% 100% at 50% 0%, #000 30%, transparent 92%);
 }
 
 .glass {
-  background: var(--glass-fill);
+  background: var(--glass-sheen), var(--glass-fill);
   backdrop-filter: blur(var(--glass-blur)) saturate(150%);
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
   border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  box-shadow: var(--glass-shadow), var(--glass-inset);
 }
 
 /* For panels that sit over busier ground, or hold dense text. */
 .glass-strong {
-  background: var(--glass-fill-strong);
+  background: var(--glass-sheen), var(--glass-fill-strong);
   backdrop-filter: blur(20px) saturate(160%);
   -webkit-backdrop-filter: blur(20px) saturate(160%);
   border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  box-shadow: var(--glass-shadow), var(--glass-inset-strong);
 }
 
 /* Dark glass for the navigation rail. */
 .glass-dark {
-  background: rgba(13, 22, 41, 0.82);
+  background:
+    linear-gradient(180deg, rgba(125, 170, 235, 0.06) 0%, rgba(125, 170, 235, 0) 30%),
+    rgba(8, 14, 28, 0.88);
   backdrop-filter: blur(20px) saturate(140%);
   -webkit-backdrop-filter: blur(20px) saturate(140%);
-  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  border-right: 1px solid var(--glass-border);
 }
 
 .glass-hover {
-  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  transition: background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 .glass-hover:hover {
-  background: var(--glass-fill-strong);
-  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  background: var(--glass-sheen), var(--glass-fill-strong);
+  border-color: var(--glass-hover-border);
+  box-shadow: var(--glass-hover-shadow), var(--glass-inset-strong);
+}
+
+/* ---------------------------------------------------------------------------
+   Instrument primitives.
+
+   These live in @layer components, not unlayered, so a utility on the same
+   element still wins: `hud-label text-red-600` has to come out red, and it
+   would not if this block outranked the utilities layer.
+--------------------------------------------------------------------------- */
+@layer components {
+  /* Small tracked-out caps used for every field name and section label. A class
+     rather than a utility string because it is five properties that always
+     travel together, repeated on ~40 elements. */
+  .hud-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-slate-500);
+  }
+
+  /* Numeric readout. Tabular figures stop a live value from reflowing its own
+     width as digits change - the difference between an instrument and a
+     jitter - and Geist Mono is now actually reachable via --font-mono. */
+  .readout {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  /* Status dot with a halo sized off the dot itself, so it works at any scale.
+     `currentColor` means the halo always matches the colour the badge set. */
+  .status-dot {
+    position: relative;
+    display: inline-block;
+    border-radius: 9999px;
+    box-shadow: 0 0 0 3px
+      color-mix(in srgb, currentColor calc(var(--dot-glow-strength) * 100%), transparent);
+  }
+
+  /* Expanding ring for a genuinely live signal. Only used where something is
+     actually streaming - a decorative pulse on a static dot is a lie. */
+  .status-dot-live::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    border-radius: 9999px;
+    border: 1px solid currentColor;
+    animation: dot-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
+  /* Active navigation item: a lit left rail plus a faint bloom into the row. */
+  .nav-active {
+    background: var(--nav-active-fill);
+    box-shadow: var(--nav-active-glow);
+  }
+  .nav-active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 60%;
+    border-radius: 0 2px 2px 0;
+    background: var(--color-brand);
+    box-shadow: 0 0 10px 1px var(--color-brand);
+  }
+}
+
+@keyframes dot-ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  75%,
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
 }
 
 /* Fallback: without backdrop-filter the fill must become opaque, or the panel
@@ -91,11 +490,11 @@ body {
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
   .glass,
   .glass-strong {
-    background: #ffffff;
-    border-color: #e2e8f0;
+    background: var(--surface-solid);
+    border-color: var(--border-solid);
   }
   .glass-dark {
-    background: #0d1629;
+    background: var(--surface-solid-dark);
   }
 }
 
@@ -104,18 +503,21 @@ body {
 @media (prefers-reduced-transparency: reduce) {
   .glass,
   .glass-strong {
-    background: #ffffff;
+    background: var(--surface-solid);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    border-color: #e2e8f0;
+    border-color: var(--border-solid);
   }
   .glass-dark {
-    background: #0d1629;
+    background: var(--surface-solid-dark);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
   .ambient-bg::before {
-    background: #f4f7fb;
+    background: var(--background-flat);
+  }
+  .ambient-bg::after {
+    display: none;
   }
 }
 
@@ -126,12 +528,18 @@ body {
   .glass-hover:hover {
     transform: none;
   }
+  /* The ping is decoration on top of a colour that already carries the state,
+     so removing it loses no information. */
+  .status-dot-live::after {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 /* Thin scrollbar that stays out of the way until hovered. */
 .scrollbar-thin {
   scrollbar-width: thin;
-  scrollbar-color: rgba(148, 163, 184, 0.15) transparent;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
 }
 .scrollbar-thin::-webkit-scrollbar {
   height: 6px;
@@ -141,11 +549,11 @@ body {
   background: transparent;
 }
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.15);
+  background: var(--scrollbar-thumb);
   border-radius: 3px;
   transition: background 0.2s ease;
 }
 .scrollbar-thin:hover::-webkit-scrollbar-thumb,
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.5);
+  background: var(--scrollbar-thumb-hover);
 }
