@@ -31,8 +31,20 @@ export const fetchDevice = (id) => getData(`/devices/devices/${id}/`);
 
 export const fetchDeviceStatus = (id) => getData(`/devices/devices/${id}/status/`);
 
+// A datalogger is a GATEWAY, not one machine: it fronts up to 247 Modbus
+// slaves. These two power the drill-down — the unit list behind one logger,
+// and that logger's whole-site rollup.
+export const fetchDeviceUnits = (id) => getData(`/devices/devices/${id}/units/`);
+
+export const fetchSiteSummary = (id) => getData(`/devices/devices/${id}/site-summary/`);
+
 /** Latest live reading per device, keyed by device id. */
 export const fetchLatestTelemetry = () => getData("/devices/devices/latest_telemetry/");
+
+// Per-datalogger rollup for the fleet table: power SUMMED across a gateway's
+// inverters, temperature AVERAGED. latest_telemetry/ returns the newest single
+// reading, which on an 8-inverter gateway is one unit presented as the site.
+export const fetchFleetSummary = () => getData("/devices/devices/fleet-summary/");
 
 export const fetchFaults = (limit = 300) =>
   getData(`/devices/devices/faults/${qs({ limit })}`);

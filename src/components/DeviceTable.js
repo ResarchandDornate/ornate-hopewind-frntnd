@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Cpu, MapPin } from "lucide-react";
+import { AlertTriangle, ArrowRight, Cpu, MapPin } from "lucide-react";
 
 import StatusBadge from "@/components/StatusBadge";
 import { formatLocation } from "@/lib/location";
@@ -16,6 +16,34 @@ import { formatPower, formatTemperature } from "@/lib/format";
  * this wide would otherwise force the whole layout to scroll horizontally on a
  * laptop screen.
  */
+// Clock skew over this is worth telling the operator about: it means the
+// reading TIMES in the charts are wrong even though the values are fine.
+const CLOCK_SKEW_WARN_MS = 10 * 60 * 1000;
+
+function LastSeenCell({ device }) {
+  const heard = device.last_heard_at || device.last_seen;
+  const reported = device.last_seen;
+
+  const skewMs =
+    heard && reported ? Math.abs(new Date(heard) - new Date(reported)) : 0;
+
+  if (skewMs < CLOCK_SKEW_WARN_MS) {
+    return <span>{formatLastSeen(heard)}</span>;
+  }
+
+  return (
+    <span
+      className="inline-flex items-center gap-1 text-amber-600"
+      title={`Device clock is out by ${Math.round(skewMs / 60000)} min — it reported ${formatLastSeen(
+        reported,
+      )}. Readings are stored under arrival time.`}
+    >
+      {formatLastSeen(heard)}
+      <AlertTriangle size={11} />
+    </span>
+  );
+}
+
 function DeviceLocation({ device }) {
   const { primary, secondary, full } = formatLocation(device);
 
@@ -54,7 +82,7 @@ export default function DeviceTable({ fleet = [], loading, compact = false }) {
       <table className="w-full min-w-[980px] text-sm">
         <thead>
           <tr className="border-b border-slate-200 text-left">
-            {["Name", "Serial", "Location", "Status", "Power", "Temp", "Faults", "Last seen", ""].map(
+            {["Name", "Serial", "Inverters", "Location", "Status", "Power", "Temp", "Faults", "Last seen", ""].map(
               (heading) => (
                 <th key={heading} className="hud-label px-3 py-3 text-[11px]">
                   {heading}
@@ -74,6 +102,38 @@ export default function DeviceTable({ fleet = [], loading, compact = false }) {
                 <td className="px-3 py-3 font-semibold text-slate-900">{device.name}</td>
                 <td className="readout px-3 py-3 text-xs text-slate-500">
                   {device.serial_number}
+                </td>
+                {/* A datalogger fronts many inverters. Showing how many are
+                    answering out of how many exist is the fastest read on
+                    whether a site is healthy — "6 / 8" says more than any
+                    single aggregate number can. */}
+                <td className="readout px-3 py-3 text-slate-700">
+                  {device.unitCount == null ? (
+                    <span className="text-slate-400">—</span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5">
+                      <span
+                        className={
+                          device.unitsOnline === device.unitCount
+                            ? "font-semibold text-emerald-600"
+                            : device.unitsOnline === 0
+                              ? "font-semibold text-red-500"
+                              : "font-semibold text-amber-600"
+                        }
+                      >
+                        {device.unitsOnline}
+                      </span>
+                      <span className="text-slate-400">/ {device.unitCount}</span>
+                      {device.unitsFaulted > 0 && (
+                        <span
+                          className="rounded bg-red-50 px-1.5 text-[10px] font-semibold text-red-600 ring-1 ring-red-100"
+                          title={`${device.unitsFaulted} inverter(s) reporting a hardware fault`}
+                        >
+                          {device.unitsFaulted}!
+                        </span>
+                      )}
+                    </span>
+                  )}
                 </td>
                 <td className="px-3 py-3">
                   <DeviceLocation device={device} />
@@ -97,7 +157,11 @@ export default function DeviceTable({ fleet = [], loading, compact = false }) {
                   )}
                 </td>
                 <td className="readout px-3 py-3 text-xs text-slate-500">
-                  {formatLastSeen(device.last_seen)}
+                  {/* Arrival time, not the timestamp the logger wrote into the
+                      payload. A logger with an unsynced clock was making this
+                      column read hours stale — or sit in the future — while its
+                      data was landing in real time. */}
+                  <LastSeenCell device={device} />
                 </td>
                 <td className="px-3 py-3 text-right">
                   <Link

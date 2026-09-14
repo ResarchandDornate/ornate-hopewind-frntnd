@@ -303,7 +303,14 @@
 }
 .dark .bg-white,
 .dark .bg-white\/80,
-.dark .bg-white\/85 {
+.dark .bg-white\/85,
+/* /90 and /95 are listed even though nothing uses them today: this list fails
+   SILENTLY and in the worst direction. An unlisted step is not "slightly off",
+   it is a full-white panel on the dark theme — which is exactly how a sticky
+   table header shipped white. Covering the whole plausible range costs two
+   selectors and removes the trap. */
+.dark .bg-white\/90,
+.dark .bg-white\/95 {
   background-color: var(--sheet-raised);
 }
 .dark .hover\:bg-white\/60:hover {

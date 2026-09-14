@@ -22,6 +22,14 @@ const STATUS_MAP = {
     dot: "bg-blue-500", text: "text-blue-700", bg: "bg-blue-50",
     ring: "ring-blue-100", label: "Unsynced", pulse: true,
   },
+  // Stale: the datalogger's MQTT session is up - the broker has not fired its
+  // Last Will - but no telemetry has arrived for its staleness window. That is
+  // a different fault from Offline, and conflating the two sends an engineer
+  // to check the power supply when the problem is the Modbus side.
+  stale: {
+    dot: "bg-amber-500", text: "text-amber-700", bg: "bg-amber-50",
+    ring: "ring-amber-100", label: "No Data",
+  },
   offline: {
     dot: "bg-red-500", text: "text-red-700", bg: "bg-red-50",
     ring: "ring-red-100", label: "Offline",

@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowLeft, Cpu, ExternalLink, Gauge, MapPin, Thermometer, Zap } from "lucide-react";
+import { ArrowLeft, ExternalLink, Gauge, MapPin, Thermometer, Zap } from "lucide-react";
 
 import GenerationChart from "@/components/charts/GenerationChart";
 import PowerConversionChart from "@/components/charts/PowerConversionChart";
@@ -12,14 +12,17 @@ import { StringCurrentChart, StringPowerBar } from "@/components/charts/StringCh
 import TrendChart from "@/components/charts/TrendChart";
 import KpiCard from "@/components/KpiCard";
 import ParameterPanels from "@/components/ParameterPanels";
+import ReadingsTable from "@/components/ReadingsTable";
+import UnitTable from "@/components/UnitTable";
 import { useShell } from "@/components/ShellContext";
 import StatusBadge from "@/components/StatusBadge";
 import Topbar from "@/components/Topbar";
 import { Card, EmptyState, ErrorState, LoadingBlock, PageBody, SegmentedControl } from "@/components/ui";
+import { useDeviceUnits, useSiteSummary } from "@/hooks/useDevices";
 import { useGeneration } from "@/hooks/useDevices";
 import { fetchDevice, fetchReadings } from "@/lib/devicesApi";
 import { computeStatus, formatFaultBitmask, formatLastSeen, hasActiveFault } from "@/lib/deviceStatus";
-import { formatDateTime, formatNumber, formatPower, formatTemperature, splitPower } from "@/lib/format";
+import { formatNumber, formatPower, formatTemperature, splitPower } from "@/lib/format";
 import { formatCoordinates, formatLocation, hasCoordinates, mapsUrl } from "@/lib/location";
 import { queryKeys } from "@/lib/queryKeys";
 
@@ -30,7 +33,15 @@ const RANGES = [
   { value: "30d", label: "30d" },
 ];
 
-export default function DeviceDetailPage() {
+/**
+ * Datalogger detail, and — when `unitId` is given — ONE inverter behind it.
+ *
+ * The same screen serves both because a single inverter's view is this view
+ * with the readings scoped to its Modbus slave address. Copying the file for
+ * the unit route would leave two renderers of the same telemetry free to drift
+ * apart, which is how the per-phase and string panels end up disagreeing.
+ */
+export default function DeviceDetailPage({ unitId = null }) {
   const { id } = useParams();
   const { connected, lastMessageAt, openNav } = useShell();
   const [range, setRange] = useState("24h");
@@ -44,14 +55,34 @@ export default function DeviceDetailPage() {
 
   // page_size is raised because the history table and chart both read this one
   // query; the default 100 rows covers barely four hours at a 15-minute cadence.
+  // inverter_id is part of the KEY as well as the request: without it, switching
+  // between two units on the same logger would serve the previous unit's cached
+  // rows and silently show inverter 3's data under inverter 7's heading.
   const readingsQuery = useQuery({
-    queryKey: queryKeys.readings({ device: id, range }),
-    queryFn: () => fetchReadings({ device: id, range, page_size: 1000, ordering: "-timestamp" }),
+    queryKey: queryKeys.readings({ device: id, range, inverter_id: unitId ?? "all" }),
+    queryFn: () =>
+      fetchReadings({
+        device: id,
+        range,
+        page_size: 1000,
+        ordering: "-timestamp",
+        ...(unitId != null ? { inverter_id: unitId } : {}),
+      }),
     refetchInterval: 20000,
     enabled: Boolean(id),
   });
 
   const generationQuery = useGeneration(range, id);
+
+  // Only on the datalogger view. On a single inverter these would describe its
+  // siblings, which is not what the page is about.
+  const unitsQuery = useDeviceUnits(unitId == null ? id : null);
+  const siteQuery = useSiteSummary(unitId == null ? id : null);
+  const units = unitsQuery.data?.units ?? [];
+  // A logger fronting exactly one inverter is the common small-site case — the
+  // drill-down list would just be a single row pointing at the same telemetry
+  // already on this page, so it earns its space only from two units up.
+  const showUnitList = unitId == null && units.length > 1;
 
   const device = deviceQuery.data;
   const rawReadings = readingsQuery.data?.results ?? [];
@@ -102,8 +133,8 @@ export default function DeviceDetailPage() {
   return (
     <>
       <Topbar
-        section="Devices"
-        title={device?.name || "Device"}
+        section={unitId == null ? "Devices" : device?.name || "Datalogger"}
+        title={unitId == null ? device?.name || "Device" : `Inverter ${unitId}`}
         connected={connected}
         lastMessageAt={lastMessageAt}
         onMenuClick={openNav}
@@ -112,11 +143,11 @@ export default function DeviceDetailPage() {
       <PageBody>
         <div className="flex flex-wrap items-center justify-between gap-3">
           <Link
-            href="/devices"
+            href={unitId == null ? "/devices" : `/devices/${id}`}
             className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-slate-900"
           >
             <ArrowLeft size={16} />
-            Back to devices
+            {unitId == null ? "Back to devices" : `Back to ${device?.name || "datalogger"}`}
           </Link>
           <div className="flex flex-wrap items-center gap-3">
             {formatLocation(device).primary && (
@@ -127,7 +158,10 @@ export default function DeviceDetailPage() {
             )}
             <StatusBadge status={status} />
             <span className="text-xs text-slate-500">
-              Last seen {formatLastSeen(device?.last_seen)}
+              {/* Arrival time, matching the devices table — a logger with an
+                  unsynced clock otherwise reads hours stale here while its
+                  data lands in real time. */}
+              Last seen {formatLastSeen(device?.last_heard_at || device?.last_seen)}
             </span>
           </div>
         </div>
@@ -157,6 +191,23 @@ export default function DeviceDetailPage() {
             hint={latest?.device_status || undefined}
           />
         </div>
+
+        {showUnitList && (
+          <Card
+            title="Inverters"
+            subtitle={
+              siteQuery.data
+                ? `${siteQuery.data.units_online} of ${siteQuery.data.unit_count} online · ` +
+                  `${((siteQuery.data.power ?? 0) / 1000).toFixed(1)} kW total` +
+                  (siteQuery.data.units_faulted
+                    ? ` · ${siteQuery.data.units_faulted} faulted`
+                    : "")
+                : `${units.length} behind this datalogger`
+            }
+          >
+            <UnitTable deviceId={id} data={unitsQuery.data} isLoading={unitsQuery.isLoading} />
+          </Card>
+        )}
 
         <ParameterPanels reading={latest} />
 
@@ -297,62 +348,13 @@ export default function DeviceDetailPage() {
             </dl>
           </Card>
 
-          <Card
-            title="Recent readings"
-            subtitle={`${readings.length} in range`}
-            className="lg:col-span-3"
-            bodyClassName="p-0"
-          >
-            {readings.length === 0 ? (
-              <EmptyState icon={Cpu} title="No readings in this range" className="h-64" />
-            ) : (
-              <div className="scrollbar-thin max-h-96 overflow-auto">
-                <table className="w-full min-w-[560px] text-sm">
-                  <thead className="sticky top-0 bg-white/85 backdrop-blur-md">
-                    <tr className="border-b border-slate-200 text-left">
-                      {["Time", "Power", "Voltage", "Current", "Temp"].map((heading) => (
-                        <th
-                          key={heading}
-                          className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500"
-                        >
-                          {heading}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {readings.slice(0, 200).map((reading) => (
-                      <tr key={reading.id} className="border-b border-slate-100 last:border-0">
-                        <td className="px-5 py-2.5 text-xs text-slate-500">
-                          {formatDateTime(reading.timestamp)}
-                          {reading.queued_offline && (
-                            <span className="ml-2 rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-blue-600">
-                              backlog
-                            </span>
-                          )}
-                          {reading.timestamp_is_estimated && (
-                            <span className="ml-2 rounded bg-amber-50 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">
-                              est.
-                            </span>
-                          )}
-                        </td>
-                        <td className="px-5 py-2.5 tabular-nums">{formatPower(reading.power)}</td>
-                        <td className="px-5 py-2.5 tabular-nums">
-                          {formatNumber(reading.voltage, 1)} V
-                        </td>
-                        <td className="px-5 py-2.5 tabular-nums">
-                          {formatNumber(reading.current, 2)} A
-                        </td>
-                        <td className="px-5 py-2.5 tabular-nums">
-                          {formatTemperature(reading.temperature)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </Card>
+          {/* Server-paginated, so this reaches ALL stored history rather than
+              whatever the chart's query happened to fetch. */}
+          <ReadingsTable
+            deviceId={id}
+            unitId={unitId}
+            serialNumber={device?.serial_number}
+          />
         </div>
       </PageBody>
     </>
