@@ -15,8 +15,14 @@ const qs = (params = {}) => {
 // ---- Dashboard ----
 export const fetchOverview = () => getData("/devices/devices/overview/");
 
-export const fetchGeneration = (range = "24h", deviceId) =>
-  getData(`/devices/devices/generation/${qs({ range, device: deviceId })}`);
+export const fetchGeneration = (range = "24h", deviceId, inverterId = null) =>
+  getData(
+    `/devices/devices/generation/${qs({
+      range,
+      device: deviceId,
+      ...(inverterId != null ? { inverter_id: inverterId } : {}),
+    })}`
+  );
 
 export const fetchEnergySummary = (period = "day", deviceId) =>
   getData(`/devices/devices/energy_summary/${qs({ period, device: deviceId })}`);

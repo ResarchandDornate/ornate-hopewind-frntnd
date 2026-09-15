@@ -31,10 +31,10 @@ export function useOverview() {
   });
 }
 
-export function useGeneration(range = "24h", deviceId) {
+export function useGeneration(range = "24h", deviceId, inverterId = null) {
   return useQuery({
-    queryKey: queryKeys.generation(range, deviceId),
-    queryFn: () => fetchGeneration(range, deviceId),
+    queryKey: queryKeys.generation(range, deviceId, inverterId),
+    queryFn: () => fetchGeneration(range, deviceId, inverterId),
     refetchInterval: 60000,
   });
 }

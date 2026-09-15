@@ -117,6 +117,7 @@ export default function AnalyticsPage() {
             <GenerationChart
               points={generationQuery.data?.points ?? []}
               bucket={generationQuery.data?.bucket}
+              range={range}
               height={340}
             />
           )}

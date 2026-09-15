@@ -72,7 +72,9 @@ export default function DeviceDetailPage({ unitId = null }) {
     enabled: Boolean(id),
   });
 
-  const generationQuery = useGeneration(range, id);
+  // On a single-inverter page the curve must be that unit's, not the whole
+  // site's — otherwise "Inverter 1" would plot all eight summed together.
+  const generationQuery = useGeneration(range, id, unitId);
 
   // Only on the datalogger view. On a single inverter these would describe its
   // siblings, which is not what the page is about.
@@ -184,8 +186,18 @@ export default function DeviceDetailPage({ unitId = null }) {
             hint={latest?.grid_frequency != null ? `${formatNumber(latest.grid_frequency, 2)} Hz` : undefined}
           />
           <KpiCard
-            label="Heatsink Temp"
-            value={formatTemperature(latest?.heatsink_temperature ?? latest?.temperature)}
+            // "Inverter Temp", because the source depends on the model. The
+            // Hopewind protocol exposes ONE temperature register (40376,
+            // internal) — no heatsink sensor and no ambient one — so a card
+            // hard-labelled "Heatsink" read "—" forever on this fleet while
+            // the reading it wanted sat one field away. Heatsink stays first
+            // in the chain for models that do report it.
+            label="Inverter Temp"
+            value={formatTemperature(
+              latest?.heatsink_temperature ??
+                latest?.internal_temperature ??
+                latest?.temperature
+            )}
             icon={Thermometer}
             accent={hasActiveFault(latest) ? "red" : "green"}
             hint={latest?.device_status || undefined}
@@ -213,7 +225,15 @@ export default function DeviceDetailPage({ unitId = null }) {
 
         <Card
           title="Generation"
-          subtitle="Rolled up from this device's readings"
+          subtitle={
+            unitId != null
+              ? `Inverter ${unitId} only`
+              : generationQuery.data?.bucket === "day"
+                ? "Site total energy per day"
+                : generationQuery.data?.bucket === "minute"
+                  ? "Site total power, per minute"
+                  : "Site total power, hourly average"
+          }
           actions={<SegmentedControl options={RANGES} value={range} onChange={setRange} size="sm" />}
         >
           {generationQuery.isLoading ? (
@@ -222,6 +242,7 @@ export default function DeviceDetailPage({ unitId = null }) {
             <GenerationChart
               points={generationQuery.data?.points ?? []}
               bucket={generationQuery.data?.bucket}
+              range={range}
             />
           )}
         </Card>

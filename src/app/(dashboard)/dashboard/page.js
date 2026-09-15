@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Activity, AlertTriangle, ArrowUpRight, Cpu, Leaf, Thermometer, Zap } from "lucide-react";
+import { Activity, AlertTriangle, ArrowUpRight, Cpu, Leaf, Zap } from "lucide-react";
 
 import EnergyBarChart, { EnergyBarLegend } from "@/components/charts/EnergyBarChart";
 import GenerationChart from "@/components/charts/GenerationChart";
@@ -12,7 +12,7 @@ import KpiCard from "@/components/KpiCard";
 import Topbar from "@/components/Topbar";
 import { Card, ErrorState, LoadingBlock, PageBody, SegmentedControl } from "@/components/ui";
 import { useDeviceFleet, useEnergySummary, useGeneration, useOverview } from "@/hooks/useDevices";
-import { formatEnergy, formatNumber, formatTemperature, splitPower } from "@/lib/format";
+import { formatEnergy, formatNumber, splitPower } from "@/lib/format";
 import { useShell } from "@/components/ShellContext";
 
 const PERIODS = [
@@ -52,7 +52,7 @@ export default function DashboardPage() {
       />
 
       <PageBody>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <KpiCard
             label="Devices Online"
             value={
@@ -78,14 +78,6 @@ export default function DashboardPage() {
             loading={overviewQuery.isLoading}
           />
           <KpiCard
-            label="Avg Temperature"
-            value={overview ? formatTemperature(overview.avg_temperature_c) : "—"}
-            icon={Thermometer}
-            accent="blue"
-            loading={overviewQuery.isLoading}
-            hint="Live devices only"
-          />
-          <KpiCard
             label="Active Faults"
             value={overview?.active_faults ?? "—"}
             icon={AlertTriangle}
@@ -100,8 +92,8 @@ export default function DashboardPage() {
             generationQuery.data?.bucket === "day"
               ? "Energy per day (kWh)"
               : generationQuery.data?.bucket === "hour"
-                ? "Average power per hour"
-                : "Average power per minute"
+                ? "Fleet total power, hourly average"
+                : "Fleet total power, per minute"
           }
           actions={<SegmentedControl options={RANGES} value={range} onChange={setRange} />}
         >
@@ -113,6 +105,7 @@ export default function DashboardPage() {
             <GenerationChart
               points={generationQuery.data?.points ?? []}
               bucket={generationQuery.data?.bucket}
+              range={range}
             />
           )}
         </Card>

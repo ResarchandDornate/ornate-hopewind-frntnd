@@ -100,6 +100,13 @@ export const tooltipProps = {
     color: CHROME.ink,
   },
   labelStyle: { color: CHROME.ink, fontWeight: 600 },
+  // REQUIRED, not cosmetic. Recharts renders each item row with
+  // `color: entry.color || '#000'`, which overrides contentStyle.color — so
+  // without this, any series whose entry carries no colour (a Bar coloured
+  // through <Cell>, for one) prints literal black onto the dark tooltip and
+  // the value is unreadable. The label escaped it only because labelStyle is
+  // set just above.
+  itemStyle: { color: CHROME.ink },
   // A wider crosshair band than the mark, so hovering a thin line is not a
   // pixel-hunt.
   cursor: { stroke: CHROME.axis, strokeWidth: 1 },

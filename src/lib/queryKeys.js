@@ -3,7 +3,14 @@
 // which components happen to be subscribed to it.
 export const queryKeys = {
   overview: ["overview"],
-  generation: (range, deviceId) => ["generation", range, deviceId ?? "all"],
+  generation: (range, deviceId, inverterId) => [
+    "generation",
+    range,
+    deviceId ?? "all",
+    // Part of the key, not just the request: without it, switching inverters
+    // would serve the previous unit's cached curve under the new heading.
+    inverterId ?? "all",
+  ],
   energySummary: (period, deviceId) => ["energy-summary", period, deviceId ?? "all"],
   comparison: (range) => ["comparison", range],
   devices: {

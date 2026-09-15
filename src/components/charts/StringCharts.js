@@ -27,6 +27,81 @@ import { formatBucketLabel, formatNumber, formatPower } from "@/lib/format";
  * against each other. That comparison is the diagnostic.
  */
 
+/**
+ * Compact tooltip for the per-string series.
+ *
+ * The default one-item-per-row layout is ~450px tall at 16 strings, inside a
+ * 280px chart. Everything past the chart's own height then disappears: each
+ * Card carries a `backdrop-filter`, which makes it a stacking context, so the
+ * NEXT card paints over the overflow and the tooltip looks like it never
+ * rendered. Laying the values out in columns keeps the whole thing inside the
+ * plot area, where nothing can paint over it.
+ *
+ * Rows are also sorted NUMERICALLY here. Recharts hands them over in payload
+ * order, which put PV10 between PV1 and PV2.
+ */
+function StringTooltip({ active, payload, label, unit }) {
+  if (!active || !payload?.length) return null;
+
+  const rows = [...payload]
+    .filter((entry) => entry.value !== null && entry.value !== undefined)
+    .sort((a, b) => {
+      const index = (name) => Number(String(name).replace(/\D/g, "")) || 0;
+      return index(a.name) - index(b.name);
+    });
+
+  if (!rows.length) return null;
+
+  // Two columns up to 10 strings, three beyond — keeps the block roughly
+  // square instead of letting it grow in one direction.
+  const columns = rows.length > 10 ? 3 : 2;
+
+  return (
+    <div
+      style={{
+        borderRadius: 14,
+        border: "1px solid var(--chart-tooltip-border)",
+        background: "var(--chart-tooltip-bg)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        boxShadow: "var(--chart-tooltip-shadow)",
+        color: CHROME.ink,
+        fontSize: 12,
+        padding: "8px 10px",
+      }}
+    >
+      <div style={{ fontWeight: 600, marginBottom: 6 }}>{label}</div>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: `repeat(${columns}, auto)`,
+          columnGap: 14,
+          rowGap: 2,
+        }}
+      >
+        {rows.map((entry) => (
+          <div key={entry.dataKey} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <span
+              aria-hidden
+              style={{
+                width: 8,
+                height: 2,
+                borderRadius: 1,
+                background: entry.color,
+                flexShrink: 0,
+              }}
+            />
+            <span style={{ color: CHROME.muted }}>{entry.name}</span>
+            <span style={{ marginLeft: "auto", fontVariantNumeric: "tabular-nums" }}>
+              {formatNumber(entry.value, 2)} {unit}
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 /** Per-string current over time. One line per string, one shared axis (all amps). */
 export function StringCurrentChart({ readings = [], metric = "current", height = 280 }) {
   const { data, stringCount } = useMemo(() => {
@@ -69,7 +144,7 @@ export function StringCurrentChart({ readings = [], metric = "current", height =
         <YAxis {...axisProps} width={58} tickFormatter={(value) => formatNumber(value, 1)} />
         <Tooltip
           {...tooltipProps}
-          formatter={(value, name) => [`${formatNumber(value, 2)} ${unit}`, name]}
+          content={<StringTooltip unit={unit} />}
         />
         <Legend {...legendProps} />
         {Array.from({ length: stringCount }, (_, index) => (
