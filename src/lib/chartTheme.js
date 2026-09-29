@@ -88,13 +88,9 @@ export const gridProps = {
 
 export const tooltipProps = {
   contentStyle: {
-    borderRadius: 14,
+    borderRadius: 10,
     border: "1px solid var(--chart-tooltip-border)",
-    // Near-opaque on purpose: a tooltip has to stay readable over whatever
-    // marks sit behind it, so it gets more fill than the panels do.
     background: "var(--chart-tooltip-bg)",
-    backdropFilter: "blur(12px)",
-    WebkitBackdropFilter: "blur(12px)",
     fontSize: 12,
     boxShadow: "var(--chart-tooltip-shadow)",
     color: CHROME.ink,

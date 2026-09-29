@@ -78,9 +78,13 @@ export default function DeviceTable({ fleet = [], loading, compact = false }) {
   }
 
   return (
-    <div className="scrollbar-thin -mx-5 overflow-x-auto px-5">
+    <div
+      className={`scrollbar-thin -mx-5 overflow-x-auto overflow-y-auto px-5 ${
+        compact ? "max-h-90" : "max-h-144"
+      }`}
+    >
       <table className="w-full min-w-[980px] text-sm">
-        <thead>
+        <thead className="sticky top-0 z-10 bg-(--surface-solid)">
           <tr className="border-b border-slate-200 text-left">
             {["Name", "Serial", "Inverters", "Location", "Status", "Power", "Temp", "Faults", "Last seen", ""].map(
               (heading) => (

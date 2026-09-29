@@ -257,14 +257,19 @@ export default function DeviceDetailPage({ unitId = null }) {
           )}
         </Card>
 
-        <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-          <Card title="String current" subtitle="One line per MPPT string — a low line is a weak string">
-            <StringCurrentChart readings={readings} metric="current" />
-          </Card>
-          <Card title="String power now" subtitle="Current output per string">
-            <StringPowerBar strings={latest?.pv_strings ?? []} />
-          </Card>
-        </div>
+        {/* Full width, not half. These inverters carry 16 strings, and sixteen
+            lines in a half-width panel compress into a band too dense to read a
+            single string out of — which is the one thing this chart is for. */}
+        <Card
+          title="String current"
+          subtitle="One line per MPPT string — a low line is a weak string"
+        >
+          <StringCurrentChart readings={readings} metric="current" height={440} />
+        </Card>
+
+        <Card title="String power now" subtitle="Current output per string">
+          <StringPowerBar strings={latest?.pv_strings ?? []} height={260} />
+        </Card>
 
         {/* Separate charts per unit rather than one chart with two y-axes:
             two arbitrary scales on one plot invent a correlation the data does

@@ -34,7 +34,7 @@ export default function RootLayout({ children }) {
             must NOT run again on a client render. */}
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
       </head>
-      <body className="ambient-bg min-h-full">
+      <body className="min-h-full">
         <Providers>{children}</Providers>
       </body>
     </html>

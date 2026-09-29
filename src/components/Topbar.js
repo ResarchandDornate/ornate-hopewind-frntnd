@@ -24,19 +24,19 @@ export default function Topbar({ section, title, connected, lastMessageAt, onMen
   const initial = displayName.charAt(0).toUpperCase();
 
   return (
-    <header className="sticky top-0 z-20 border-b border-white/60 bg-white/65 px-4 py-3 backdrop-blur-xl backdrop-saturate-150 md:px-6">
+    <header className="sticky top-0 z-20 border-b border-(--border-solid) bg-(--surface-solid) px-4 py-3 md:px-6">
       <div className="flex items-center gap-3">
         <button
           type="button"
           onClick={onMenuClick}
-          className="rounded-xl p-2 text-slate-600 hover:bg-white/60 md:hidden"
+          className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 md:hidden"
           aria-label="Open navigation"
         >
           <Menu size={20} />
         </button>
 
         <div className="min-w-0 flex-1">
-          <p className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+          <p className="flex items-center gap-1 text-[11px] font-medium uppercase tracking-wide text-slate-400">
             {section && (
               <>
                 <span>{section}</span>
@@ -45,7 +45,7 @@ export default function Topbar({ section, title, connected, lastMessageAt, onMen
             )}
             <span className="text-slate-500">{title}</span>
           </p>
-          <h1 className="truncate text-xl font-bold tracking-tight text-slate-900">{title}</h1>
+          <h1 className="truncate text-lg font-semibold tracking-tight text-slate-900">{title}</h1>
         </div>
 
         {actions}
@@ -53,7 +53,7 @@ export default function Topbar({ section, title, connected, lastMessageAt, onMen
         <Clock />
 
         <div
-          className={`hidden items-center gap-2 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest sm:flex ${
+          className={`hidden items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide sm:flex ${
             connected ? "bg-green-50 text-green-700" : "bg-slate-100 text-slate-500"
           }`}
           title={
@@ -77,9 +77,9 @@ export default function Topbar({ section, title, connected, lastMessageAt, onMen
           {/* Burnt ink on full brand orange rather than white on it: white
               lands at 2.8:1 against #f4801f, which will not carry a letterform.
               This keeps the fill at full saturation and clears AA. */}
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-on-brand shadow-[0_0_18px_rgba(244,128,31,0.5)]">
+          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-on-brand">
             {initial ? (
-              <span className="readout text-sm font-bold">{initial}</span>
+              <span className="text-sm font-semibold">{initial}</span>
             ) : (
               <User size={17} />
             )}

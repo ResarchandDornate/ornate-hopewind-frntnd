@@ -48,7 +48,7 @@ export default function StatusBadge({ status, className = "" }) {
   const style = STATUS_MAP[status] || STATUS_MAP.unknown;
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider ring-1 ${style.bg} ${style.text} ${style.ring} ${className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ring-1 ${style.bg} ${style.text} ${style.ring} ${className}`}
     >
       <span
         className={`status-dot h-1.5 w-1.5 ${style.dot} ${style.live ? "status-dot-live" : ""} ${

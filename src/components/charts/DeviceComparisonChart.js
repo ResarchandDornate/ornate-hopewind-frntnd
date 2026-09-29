@@ -15,6 +15,7 @@ import {
 import { EmptyState } from "@/components/ui";
 import { axisProps, gridProps, legendProps, seriesColor, tooltipProps } from "@/lib/chartTheme";
 import { formatBucketLabel, formatEnergy } from "@/lib/format";
+import ChartTooltip from "@/components/charts/ChartTooltip";
 
 /**
  * Energy per device over shared time buckets.
@@ -88,7 +89,11 @@ export default function DeviceComparisonChart({ payload, height = 320 }) {
         <CartesianGrid strokeDasharray="0" {...gridProps} />
         <XAxis dataKey="label" {...axisProps} minTickGap={28} />
         <YAxis {...axisProps} width={68} tickFormatter={(value) => formatEnergy(value, 0)} />
-        <Tooltip {...tooltipProps} formatter={(value, name) => [formatEnergy(value), name]} />
+        <Tooltip
+          {...tooltipProps}
+          content={<ChartTooltip />}
+          formatter={(value, name) => [formatEnergy(value), name]}
+        />
         <Legend {...legendProps} />
         {series.map((entry) => (
           <Line

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 
+import ConnectionGuard from "@/components/ConnectionGuard";
 import ThemeProvider, { useTheme } from "@/components/ThemeProvider";
 
 export default function Providers({ children }) {
@@ -28,6 +29,10 @@ export default function Providers({ children }) {
       <ThemeProvider>
         {children}
         <ThemedToaster />
+        {/* Mounted at the root, above the route tree, so the popup also covers
+            the login and signup screens — losing the connection while signing
+            in is exactly when "wrong password" would be the wrong message. */}
+        <ConnectionGuard />
       </ThemeProvider>
     </QueryClientProvider>
   );

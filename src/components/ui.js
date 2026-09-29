@@ -2,47 +2,21 @@
 
 import { Loader2 } from "lucide-react";
 
-/**
- * Standard panel used by every page section.
- *
- * The title carries a short brand tick on its left edge — the same shape the
- * navigation rail uses for the active item, so "this is the thing you are
- * looking at" reads the same way in both places.
- */
+/** Standard panel used by every page section. */
 export function Card({ title, subtitle, actions, children, className = "", bodyClassName = "" }) {
   return (
-    <section className={`glass glass-hover relative rounded-2xl ${className}`}>
-      {/* Inset rather than full-bleed so it stops short of the rounded corners
-          — the alternative, overflow-hidden, would clip the sticky table heads
-          and chart tooltips that live inside these panels. */}
-      <span
-        aria-hidden
-        className="absolute inset-x-6 top-0 h-px bg-linear-to-r from-transparent via-white/25 to-transparent"
-      />
-
+    <section className={`glass glass-hover rounded-xl ${className}`}>
       {(title || actions) && (
-        <div className="relative flex flex-wrap items-center justify-between gap-3 px-5 py-4">
-          <div className="flex min-w-0 items-start gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-(--border-solid) px-5 py-3.5">
+          <div className="min-w-0">
             {title && (
-              <span
-                aria-hidden
-                className="mt-1 h-7 w-0.5 shrink-0 rounded-full bg-linear-to-b from-brand to-transparent"
-              />
+              <h2 className="truncate text-sm font-semibold tracking-tight text-slate-900">
+                {title}
+              </h2>
             )}
-            <div className="min-w-0">
-              {title && (
-                <h2 className="truncate text-base font-bold tracking-tight text-slate-900">
-                  {title}
-                </h2>
-              )}
-              {subtitle && <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>}
-            </div>
+            {subtitle && <p className="mt-0.5 text-xs text-slate-500">{subtitle}</p>}
           </div>
           {actions}
-          <span
-            aria-hidden
-            className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-white/15 to-transparent"
-          />
         </div>
       )}
       <div className={`p-5 ${bodyClassName}`}>{children}</div>
@@ -58,7 +32,7 @@ export function Spinner({ className = "" }) {
 export function LoadingBlock({ label = "Loading…", className = "h-64" }) {
   return (
     <div className={`flex flex-col items-center justify-center gap-3 text-slate-400 ${className}`}>
-      <Spinner className="h-6 w-6 drop-shadow-[0_0_10px_rgba(249,115,22,0.5)]" />
+      <Spinner className="h-6 w-6" />
       <p className="hud-label">{label}</p>
     </div>
   );
@@ -107,7 +81,7 @@ export function SegmentedControl({ options, value, onChange, size = "md" }) {
   // header on a laptop.
   const pad = size === "sm" ? "px-2.5 py-1 text-[11px]" : "px-3.5 py-1.5 text-xs";
   return (
-    <div className="inline-flex rounded-xl border border-white/60 bg-white/50 p-1 backdrop-blur">
+    <div className="inline-flex items-center gap-0.5 rounded-lg bg-slate-100 p-1">
       {options.map((option) => (
         <button
           key={option.value}
@@ -116,7 +90,7 @@ export function SegmentedControl({ options, value, onChange, size = "md" }) {
           aria-pressed={value === option.value}
           className={`rounded-md font-semibold transition ${pad} ${
             value === option.value
-              ? "bg-white text-slate-900 shadow-sm"
+              ? "bg-(--surface-solid) text-slate-900 shadow-sm"
               : "text-slate-500 hover:text-slate-700"
           }`}
         >
@@ -124,23 +98,6 @@ export function SegmentedControl({ options, value, onChange, size = "md" }) {
         </button>
       ))}
     </div>
-  );
-}
-
-/**
- * Four corner ticks for the auth panels. Purely decorative, and deliberately
- * one span per corner with two borders rather than eight hairline divs. Needs
- * a positioned ancestor - it anchors to the panel, not to itself.
- */
-export function CornerMarks() {
-  const base = "pointer-events-none absolute h-4 w-4 border-brand/40";
-  return (
-    <span aria-hidden>
-      <span className={`${base} left-3 top-3 border-l border-t`} />
-      <span className={`${base} right-3 top-3 border-r border-t`} />
-      <span className={`${base} bottom-3 left-3 border-b border-l`} />
-      <span className={`${base} bottom-3 right-3 border-b border-r`} />
-    </span>
   );
 }
 

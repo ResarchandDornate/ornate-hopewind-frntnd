@@ -49,7 +49,7 @@ export default function FaultsPage() {
               {live.map((fault) => (
                 <li
                   key={`${fault.device_id}-${fault.timestamp}`}
-                  className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-200/60 bg-red-50/50 px-4 py-3 backdrop-blur-sm"
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-red-100 bg-red-50/60 px-4 py-3"
                 >
                   <div className="flex min-w-0 items-center gap-3">
                     <AlertTriangle size={18} className="shrink-0 text-red-500" />
@@ -66,7 +66,7 @@ export default function FaultsPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="rounded-md border border-white/70 bg-white/80 px-2 py-1 font-mono text-xs font-semibold text-red-600">
+                    <span className="rounded-md border border-(--border-solid) bg-(--surface-solid) px-2 py-1 font-mono text-xs font-semibold text-red-600">
                       {fault.hw_fault ? "HW FAULT" : formatFaultBitmask(fault.fault_bitmask)}
                     </span>
                     <StatusBadge status={fault.status} />
@@ -93,7 +93,7 @@ export default function FaultsPage() {
           ) : (
             <div className="scrollbar-thin max-h-[32rem] overflow-auto">
               <table className="w-full min-w-[680px] text-sm">
-                <thead className="sticky top-0 bg-white/85 backdrop-blur-md">
+                <thead className="sticky top-0 bg-(--surface-solid)">
                   <tr className="border-b border-slate-200 text-left">
                     {["Device", "Serial", "When", "Fault", "Type"].map((heading) => (
                       <th

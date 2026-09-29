@@ -15,6 +15,7 @@ import {
 import { EmptyState } from "@/components/ui";
 import { SERIES_COLORS, axisProps, gridProps, legendProps, tooltipProps } from "@/lib/chartTheme";
 import { formatBucketLabel, formatPower } from "@/lib/format";
+import ChartTooltip from "@/components/charts/ChartTooltip";
 
 /**
  * DC input against AC output.
@@ -65,7 +66,11 @@ export default function PowerConversionChart({ readings = [], height = 280 }) {
           <CartesianGrid strokeDasharray="0" {...gridProps} />
           <XAxis dataKey="label" {...axisProps} minTickGap={32} />
           <YAxis {...axisProps} width={64} tickFormatter={(value) => formatPower(value)} />
-          <Tooltip {...tooltipProps} formatter={(value, name) => [formatPower(value), name]} />
+          <Tooltip
+            {...tooltipProps}
+            content={<ChartTooltip />}
+            formatter={(value, name) => [formatPower(value), name]}
+          />
           <Legend {...legendProps} />
           {hasDc && (
             <Area

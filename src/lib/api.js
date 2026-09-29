@@ -1,6 +1,7 @@
 import axios from "axios";
 
 import { clearSession, getToken } from "./auth";
+import { classifyConnectionError, reportOffline, reportOnline } from "./connectivity";
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/";
 
@@ -39,10 +40,28 @@ axiosInstance.interceptors.request.use((config) => {
 });
 
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Any answer at all proves the connection is back, which is what closes the
+    // popup. Recovery is only ever declared from a real response, never from
+    // navigator.onLine.
+    reportOnline();
+    return response;
+  },
   async (error) => {
     const config = error.config || {};
     const status = error.response?.status;
+
+    // Raise the connectivity popup before the per-status handling below: a
+    // request that never reached the server has no status to act on, and the
+    // caller's own catch block would otherwise surface it as an ordinary
+    // "Sign-in failed" toast with no hint that the network is the problem.
+    const offlineKind = classifyConnectionError(error);
+    if (offlineKind) {
+      reportOffline(offlineKind);
+      error.isConnectionError = true;
+    } else if (error.response) {
+      reportOnline();
+    }
 
     // An expired access token is the common case, and the backend issues
     // refresh tokens — redeem one and replay the request rather than dumping
@@ -111,6 +130,18 @@ const enforceSuccessFlag = (data) => {
 };
 
 const buildErrorFromResponse = (error) => {
+  // A connectivity failure is already being reported by the popup, so callers
+  // need to recognise it and stay quiet rather than adding a second, vaguer
+  // message of their own. The flag has to be re-attached because this function
+  // returns a NEW Error and would otherwise lose it.
+  if (error?.isConnectionError) {
+    const connectionError = new Error(
+      "No connection to the server. Check your internet and try again."
+    );
+    connectionError.isConnectionError = true;
+    return connectionError;
+  }
+
   if (error.response) {
     const data = error.response.data;
     if (typeof data === "string") return new Error(data);

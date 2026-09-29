@@ -56,7 +56,7 @@ export default function UnitTable({ deviceId, data, isLoading }) {
     <div className="overflow-x-auto">
       <table className="min-w-full text-sm">
         <thead>
-          <tr className="text-left text-[10px] font-semibold uppercase tracking-wider text-zinc-500">
+          <tr className="hud-label text-left">
             <th className="px-3 py-2">Inverter</th>
             <th className="px-3 py-2">Serial</th>
             <th className="px-3 py-2">Status</th>
@@ -68,48 +68,48 @@ export default function UnitTable({ deviceId, data, isLoading }) {
             <th className="px-3 py-2" />
           </tr>
         </thead>
-        <tbody className="divide-y divide-white/10">
+        <tbody className="divide-y divide-slate-100">
           {units.map((unit) => {
             const latest = unit.latest || {};
             const faults = latest.active_faults || [];
             const alarms = latest.active_alarms || [];
             return (
-              <tr key={unit.unit_id} className="hover:bg-white/5">
+              <tr key={unit.unit_id} className="hover:bg-slate-50/70">
                 <td className="px-3 py-2.5">
-                  <div className="font-semibold text-zinc-100">Inverter {unit.unit_id}</div>
-                  <div className="text-[10px] text-zinc-500">
+                  <div className="font-semibold text-slate-900">Inverter {unit.unit_id}</div>
+                  <div className="text-[11px] text-slate-400">
                     {/* A unit that reports without ever announcing itself is
                         still real data — flag it rather than hiding it. */}
                     {unit.configured ? `Modbus ${unit.unit_id}` : "not in config"}
                   </div>
                 </td>
-                <td className="px-3 py-2.5 font-mono text-xs text-zinc-400">
+                <td className="px-3 py-2.5 font-mono text-xs text-slate-500">
                   {unit.serial_number || "—"}
                 </td>
                 <td className="px-3 py-2.5">
                   <StatusBadge status={unitStatus(unit)} />
                 </td>
-                <td className="px-3 py-2.5 text-right font-semibold tabular-nums text-zinc-100">
+                <td className="px-3 py-2.5 text-right font-semibold tabular-nums text-slate-900">
                   {kw(latest.power)}
                 </td>
-                <td className="px-3 py-2.5 text-right tabular-nums text-zinc-300">
+                <td className="px-3 py-2.5 text-right tabular-nums text-slate-700">
                   {latest.today_energy_kwh === null || latest.today_energy_kwh === undefined
                     ? "—"
                     : `${fmt(latest.today_energy_kwh, 1)} kWh`}
                 </td>
-                <td className="px-3 py-2.5 text-right tabular-nums text-zinc-300">
+                <td className="px-3 py-2.5 text-right tabular-nums text-slate-700">
                   {latest.internal_temperature === null ||
                   latest.internal_temperature === undefined
                     ? "—"
                     : `${fmt(latest.internal_temperature, 1)} °C`}
                 </td>
-                <td className="px-3 py-2.5 text-right tabular-nums text-zinc-400">
+                <td className="px-3 py-2.5 text-right tabular-nums text-slate-500">
                   {unit.rated_kw ? `${unit.rated_kw} kW` : "—"}
                 </td>
                 <td className="px-3 py-2.5">
                   {faults.length || alarms.length ? (
                     <span
-                      className="inline-flex items-center gap-1 text-xs text-amber-300"
+                      className="inline-flex items-center gap-1 text-xs font-semibold text-amber-600"
                       title={[...faults, ...alarms].join(", ")}
                     >
                       <AlertTriangle className="h-3.5 w-3.5" />
@@ -118,13 +118,13 @@ export default function UnitTable({ deviceId, data, isLoading }) {
                       {alarms.length ? `${alarms.length} alarm` : ""}
                     </span>
                   ) : (
-                    <span className="text-xs text-zinc-600">—</span>
+                    <span className="text-xs text-slate-400">—</span>
                   )}
                 </td>
                 <td className="px-3 py-2.5 text-right">
                   <Link
                     href={`/devices/${deviceId}/unit/${unit.unit_id}`}
-                    className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-orange-300 hover:bg-white/5"
+                    className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-orange-600 hover:bg-slate-100 hover:text-orange-700"
                   >
                     View <ChevronRight className="h-3.5 w-3.5" />
                   </Link>

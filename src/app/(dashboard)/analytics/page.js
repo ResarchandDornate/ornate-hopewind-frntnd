@@ -96,7 +96,7 @@ export default function AnalyticsPage() {
               <select
                 value={deviceId}
                 onChange={(event) => setDeviceId(event.target.value)}
-                className="rounded-xl border border-white/60 bg-white/55 px-3 py-1.5 text-sm outline-none backdrop-blur focus:border-orange-400"
+                className="rounded-lg border border-(--border-solid) bg-(--surface-solid) px-3 py-1.5 text-sm outline-none focus:border-orange-400"
               >
                 <option value="">All devices</option>
                 {(devicesQuery.data ?? []).map((device) => (
@@ -161,9 +161,9 @@ export default function AnalyticsPage() {
               hint="Totals appear once devices have published readings."
             />
           ) : (
-            <div className="scrollbar-thin overflow-x-auto">
+            <div className="scrollbar-thin max-h-144 overflow-x-auto overflow-y-auto">
               <table className="w-full min-w-[560px] text-sm">
-                <thead>
+                <thead className="sticky top-0 z-10 bg-(--surface-solid)">
                   <tr className="border-b border-slate-200 text-left">
                     {["Device", "Serial", "Status", "Energy", "Share"].map((heading) => (
                       <th

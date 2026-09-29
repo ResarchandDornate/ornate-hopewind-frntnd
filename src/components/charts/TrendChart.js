@@ -15,6 +15,7 @@ import {
 import { EmptyState } from "@/components/ui";
 import { axisProps, gridProps, legendProps, seriesColor, tooltipProps } from "@/lib/chartTheme";
 import { formatBucketLabel, formatNumber } from "@/lib/format";
+import ChartTooltip from "@/components/charts/ChartTooltip";
 
 /**
  * Multi-series trend over time, on a SINGLE y-axis.
@@ -78,6 +79,7 @@ export default function TrendChart({
         />
         <Tooltip
           {...tooltipProps}
+          content={<ChartTooltip />}
           formatter={(value, name) => [
             `${formatNumber(value, digits)}${unit ? ` ${unit}` : ""}`,
             name,

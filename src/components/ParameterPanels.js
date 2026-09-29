@@ -91,6 +91,29 @@ export function DcInputPanel({ reading }) {
   const strings = Array.isArray(reading?.pv_strings) ? reading.pv_strings : [];
   const mppt = Array.isArray(reading?.mppt_inputs) ? reading.mppt_inputs : [];
 
+  // Compared on CURRENT, not power: this inverter measures string current only,
+  // and with no documented string-to-tracker map, per-string power cannot be
+  // derived. Hoisted out of the row loop, which recomputed it 16 times per
+  // render for an answer that cannot change between rows.
+  const bestCurrent = strings.length
+    ? Math.max(...strings.map((entry) => Number(entry.current) || 0))
+    : 0;
+
+  // Past eight strings a single column runs taller than the panel beside it and
+  // leaves a column of dead space. Splitting into two balanced halves keeps the
+  // block rectangular: 16 strings read as 8 + 8, 12 as 6 + 6.
+  const stringColumns = [];
+  if (strings.length) {
+    const perColumn = strings.length > 8 ? Math.ceil(strings.length / 2) : strings.length;
+    for (let start = 0; start < strings.length; start += perColumn) {
+      stringColumns.push(
+        strings
+          .slice(start, start + perColumn)
+          .map((entry, offset) => ({ entry, position: start + offset }))
+      );
+    }
+  }
+
   return (
     <Card
       title="DC input"
@@ -127,9 +150,17 @@ export function DcInputPanel({ reading }) {
               </tr>
             </thead>
             <tbody>
-              {mppt.map((entry) => (
-                <tr key={entry.index} className="border-b border-slate-100 last:border-0">
-                  <td className="py-2 pr-4 font-semibold text-slate-900">MPPT{entry.index}</td>
+              {/* Fall back to the row position: a payload missing `index`
+                  otherwise gives every row the same undefined key, and React
+                  then drops or duplicates rows rather than rendering them. */}
+              {mppt.map((entry, position) => (
+                <tr
+                  key={entry.index ?? position}
+                  className="border-b border-slate-100 last:border-0"
+                >
+                  <td className="py-2 pr-4 font-semibold text-slate-900">
+                    MPPT{entry.index ?? position + 1}
+                  </td>
                   <td className="py-2 pr-4 tabular-nums text-slate-700">{fmt(entry.voltage, "V")}</td>
                   <td className="py-2 pr-4 tabular-nums text-slate-700">
                     {entry.power === null || entry.power === undefined
@@ -144,57 +175,85 @@ export function DcInputPanel({ reading }) {
       )}
 
       {strings.length > 0 ? (
-        <div className="scrollbar-thin mt-5 -mx-5 overflow-x-auto px-5">
+        <div className="mt-5">
           <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
             String currents
           </p>
-          <table className="w-full min-w-[380px] text-sm">
-            <thead>
-              <tr className="border-b border-slate-200 text-left">
-                {["String", "Current", "Share"].map((heading) => (
-                  <th
-                    key={heading}
-                    className="py-2 pr-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500"
-                  >
-                    {heading}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {strings.map((entry) => {
-                // Compared on CURRENT, not power: this inverter measures string
-                // current only, and with no documented string-to-tracker map,
-                // per-string power cannot be derived.
-                const best = Math.max(...strings.map((s) => Number(s.current) || 0));
-                const share = best ? ((Number(entry.current) || 0) / best) * 100 : 0;
-                return (
-                  <tr key={entry.index} className="border-b border-slate-100 last:border-0">
-                    <td className="py-2 pr-4 font-semibold text-slate-900">PV{entry.index}</td>
-                    <td className="py-2 pr-4 tabular-nums text-slate-700">
-                      {fmt(entry.current, "A")}
-                    </td>
-                    <td className="py-2 pr-4">
-                      <div className="flex items-center gap-2">
-                        <div className="h-1.5 w-16 overflow-hidden rounded-full bg-slate-100">
-                          <div
-                            className="h-full rounded-full"
-                            style={{
-                              width: `${Math.min(share, 100)}%`,
-                              background: share < 85 ? "#d03b3b" : "#eb6834",
-                            }}
-                          />
-                        </div>
-                        <span className="text-xs tabular-nums text-slate-500">
-                          {share.toFixed(0)}%
-                        </span>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+
+          <div
+            className={`grid gap-x-8 ${
+              stringColumns.length > 1 ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"
+            }`}
+          >
+            {stringColumns.map((column, columnIndex) => (
+              <div key={columnIndex} className="scrollbar-thin min-w-0 overflow-x-auto">
+                {/* table-fixed with an explicit colgroup, so the two halves line
+                    up with each other instead of each sizing to its own widest
+                    cell and rendering as two slightly different tables. */}
+                <table className="w-full min-w-[300px] table-fixed text-sm">
+                  <colgroup>
+                    <col className="w-[26%]" />
+                    <col className="w-[30%]" />
+                    <col className="w-[44%]" />
+                  </colgroup>
+                  <thead>
+                    <tr className="border-b border-slate-200 text-left">
+                      {["String", "Current", "Share"].map((heading) => (
+                        <th
+                          key={heading}
+                          className="py-2 pr-4 text-[11px] font-semibold uppercase tracking-wider text-slate-500"
+                        >
+                          {heading}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {column.map(({ entry, position }) => {
+                      const share = bestCurrent
+                        ? ((Number(entry.current) || 0) / bestCurrent) * 100
+                        : 0;
+                      const weak = share < 85;
+                      return (
+                        <tr
+                          key={entry.index ?? position}
+                          className="border-b border-slate-100 last:border-0"
+                        >
+                          <td className="py-2 pr-4 font-semibold text-slate-900">
+                            PV{entry.index ?? position + 1}
+                          </td>
+                          <td
+                            className={`py-2 pr-4 tabular-nums ${
+                              weak ? "font-semibold text-red-600" : "text-slate-700"
+                            }`}
+                          >
+                            {fmt(entry.current, "A")}
+                          </td>
+                          <td className="py-2 pr-4">
+                            <div className="flex items-center gap-2">
+                              <div className="h-1.5 min-w-0 flex-1 overflow-hidden rounded-full bg-slate-100">
+                                <div
+                                  className="h-full rounded-full"
+                                  style={{
+                                    width: `${Math.min(share, 100)}%`,
+                                    background: weak ? "#d03b3b" : "#eb6834",
+                                  }}
+                                />
+                              </div>
+                              <span className="w-9 shrink-0 text-right text-xs tabular-nums text-slate-500">
+                                {share.toFixed(0)}%
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            ))}
+          </div>
+
           <p className="mt-2 text-xs text-slate-400">
             Share is each string against the strongest. A string well below the rest points at
             shading, soiling or a disconnected module.

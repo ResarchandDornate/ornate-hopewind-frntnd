@@ -5,6 +5,7 @@ import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 
 import { EmptyState } from "@/components/ui";
 import { CHROME, STATUS_COLORS, tooltipProps } from "@/lib/chartTheme";
+import ChartTooltip from "@/components/charts/ChartTooltip";
 
 /**
  * Fleet state at a glance.
@@ -65,6 +66,7 @@ export default function StatusDonut({ breakdown, height = 220 }) {
             </Pie>
             <Tooltip
               {...tooltipProps}
+              content={<ChartTooltip />}
               cursor={false}
               formatter={(value, name) => [
                 `${value} device${value === 1 ? "" : "s"} · ${((value / total) * 100).toFixed(0)}%`,
@@ -76,7 +78,7 @@ export default function StatusDonut({ breakdown, height = 220 }) {
         {/* Hero figure in the hole — the number is the headline, the ring is
             the breakdown. Proportional figures, not tabular. */}
         <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-2xl font-bold text-slate-900">{total}</span>
+          <span className="text-2xl font-semibold text-slate-900">{total}</span>
           <span className="text-[11px] uppercase tracking-wider text-slate-500">Devices</span>
         </div>
       </div>

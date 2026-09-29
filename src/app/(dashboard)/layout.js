@@ -56,7 +56,7 @@ export default function DashboardLayout({ children }) {
               type="button"
               aria-label="Close navigation"
               onClick={() => setMobileNavOpen(false)}
-              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm dark:bg-black/60"
+              className="absolute inset-0 bg-slate-900/50"
             />
             <div className="absolute inset-y-0 left-0 h-full">
               <Sidebar onNavigate={() => setMobileNavOpen(false)} />

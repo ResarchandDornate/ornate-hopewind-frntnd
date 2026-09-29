@@ -186,15 +186,15 @@ export default function DashboardPage() {
 
 function SummaryTile({ icon: Icon, label, value, unit }) {
   return (
-    <div className="glass glass-hover flex items-center gap-4 rounded-2xl p-5">
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/60 bg-white/60">
-        <Icon size={20} className="text-slate-600" />
+    <div className="glass glass-hover flex items-center gap-4 rounded-xl p-4">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100">
+        <Icon size={18} className="text-slate-600" />
       </div>
       <div className="min-w-0">
         <p className="hud-label">{label}</p>
-        <p className="readout mt-0.5 truncate text-lg font-bold text-slate-900">
+        <p className="mt-0.5 truncate text-lg font-semibold tabular-nums text-slate-900">
           {value}
-          {unit ? <span className="ml-1 text-sm font-semibold text-slate-500">{unit}</span> : null}
+          {unit ? <span className="ml-1 text-sm font-medium text-slate-500">{unit}</span> : null}
         </p>
       </div>
     </div>

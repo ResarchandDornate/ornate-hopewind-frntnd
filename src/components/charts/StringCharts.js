@@ -18,6 +18,7 @@ import {
 import { EmptyState } from "@/components/ui";
 import { CHROME, SERIES_COLORS, axisProps, gridProps, legendProps, seriesColor, tooltipProps } from "@/lib/chartTheme";
 import { formatBucketLabel, formatNumber, formatPower } from "@/lib/format";
+import ChartTooltip, { legible } from "@/components/charts/ChartTooltip";
 
 /**
  * String-level DC monitoring — the reason per-string data is collected at all.
@@ -59,11 +60,9 @@ function StringTooltip({ active, payload, label, unit }) {
   return (
     <div
       style={{
-        borderRadius: 14,
+        borderRadius: 10,
         border: "1px solid var(--chart-tooltip-border)",
         background: "var(--chart-tooltip-bg)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
         boxShadow: "var(--chart-tooltip-shadow)",
         color: CHROME.ink,
         fontSize: 12,
@@ -91,8 +90,33 @@ function StringTooltip({ active, payload, label, unit }) {
                 flexShrink: 0,
               }}
             />
-            <span style={{ color: CHROME.muted }}>{entry.name}</span>
-            <span style={{ marginLeft: "auto", fontVariantNumeric: "tabular-nums" }}>
+            {/* Colour sits on the NAME here, not the value — the reverse of the
+                shared tooltip. With up to 32 strings listed at once, colouring
+                every number turns the block into a rainbow and no reading can be
+                compared against another. Carrying the hue on the PV label keeps
+                each row tied to its line while the numbers stay in one ink
+                colour and can be scanned down the column. */}
+            <span
+              style={{
+                color: legible(entry.color),
+                fontSize: 11,
+                fontWeight: 600,
+              }}
+            >
+              {entry.name}
+            </span>
+            {/* Held at 13px, not the shared tooltip's 16px: this grid carries up
+                to 32 strings at once and 16px would push it past the chart. */}
+            <span
+              style={{
+                marginLeft: "auto",
+                paddingLeft: 10,
+                color: CHROME.ink,
+                fontSize: 13,
+                fontWeight: 700,
+                fontVariantNumeric: "tabular-nums",
+              }}
+            >
               {formatNumber(entry.value, 2)} {unit}
             </span>
           </div>
@@ -146,7 +170,17 @@ export function StringCurrentChart({ readings = [], metric = "current", height =
           {...tooltipProps}
           content={<StringTooltip unit={unit} />}
         />
-        <Legend {...legendProps} />
+        {/* Explicit payload so the legend reads PV1, PV2 … PV16. Left to build
+            its own, it ordered the entries as text and put PV10 second. */}
+        <Legend
+          {...legendProps}
+          payload={Array.from({ length: stringCount }, (_, index) => ({
+            value: `PV${index + 1}`,
+            type: "line",
+            id: `pv${index + 1}`,
+            color: seriesColor(index),
+          }))}
+        />
         {Array.from({ length: stringCount }, (_, index) => (
           <Line
             key={index}
@@ -155,6 +189,11 @@ export function StringCurrentChart({ readings = [], metric = "current", height =
             name={`PV${index + 1}`}
             stroke={seriesColor(index)}
             strokeWidth={2}
+            // The palette holds 8 hues and seriesColor cycles, so on a 16-string
+            // inverter PV9 is drawn the same colour as PV1. Dashing the second
+            // cycle keeps every line individually identifiable instead of
+            // leaving eight ambiguous pairs.
+            strokeDasharray={index >= SERIES_COLORS.length ? "6 4" : undefined}
             dot={false}
             connectNulls={false}
             isAnimationActive={false}
@@ -174,8 +213,12 @@ export function StringCurrentChart({ readings = [], metric = "current", height =
 export function StringPowerBar({ strings = [], height = 200 }) {
   const data = useMemo(
     () =>
-      strings.map((entry) => ({
-        label: `PV${entry.index}`,
+      // `index` is the string's own number and is what the label should show.
+      // Falling back to the array position keeps the labels distinct when a
+      // payload omits it — otherwise every bar is labelled "PVundefined", which
+      // is both meaningless to read and a duplicate React key.
+      strings.map((entry, position) => ({
+        label: `PV${entry.index ?? position + 1}`,
         power: Number(entry.power ?? 0),
       })),
     [strings]
@@ -204,13 +247,17 @@ export function StringPowerBar({ strings = [], height = 200 }) {
           <YAxis {...axisProps} width={64} tickFormatter={(value) => formatPower(value)} />
           <Tooltip
             {...tooltipProps}
+            content={<ChartTooltip accent={SERIES_COLORS[0]} />}
             cursor={{ fill: CHROME.cursorFill }}
             formatter={(value) => [formatPower(value), "Power"]}
           />
           <Bar dataKey="power" radius={[4, 4, 0, 0]} maxBarSize={56}>
+            {/* Cells are positional, so the position is the honest key. Keying
+                on the label made every cell collide whenever two strings shared
+                one. */}
             {data.map((entry, index) => (
               <Cell
-                key={entry.label}
+                key={`${entry.label}-${index}`}
                 fill={index === weakIndex ? "#d03b3b" : SERIES_COLORS[0]}
               />
             ))}

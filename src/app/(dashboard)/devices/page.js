@@ -57,7 +57,7 @@ export default function DevicesPage() {
           subtitle={`${visible.length} of ${fleet.length} shown`}
           actions={
             <div className="flex flex-wrap items-center gap-2">
-              <div className="flex items-center gap-2 rounded-xl border border-white/60 bg-white/55 px-3 py-1.5 backdrop-blur">
+              <div className="flex items-center gap-2 rounded-lg border border-(--border-solid) bg-(--surface-solid) px-3 py-1.5">
                 <Search size={15} className="text-slate-400" />
                 <input
                   value={search}

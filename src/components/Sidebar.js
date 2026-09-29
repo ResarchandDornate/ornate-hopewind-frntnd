@@ -41,14 +41,10 @@ export default function Sidebar({ onNavigate }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/icon.png" alt="Ornate Solar" className="h-9 w-auto shrink-0 object-contain" />
         <div className="min-w-0">
-          <p className="text-sm font-bold leading-tight text-white">Ornate Solar</p>
-          <p className="readout text-[10px] uppercase tracking-[0.18em] text-slate-400">
-            Krishna Box
-          </p>
+          <p className="text-sm font-semibold leading-tight text-white">Ornate Solar</p>
+          <p className="text-[11px] uppercase tracking-wide text-slate-400">Krishna Box</p>
         </div>
-        {/* A lit hairline rather than a flat border - it reads as the edge of a
-            panel with a light above it, which is the whole look. */}
-        <span className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-white/15 to-transparent" />
+        <span className="absolute inset-x-0 bottom-0 h-px bg-white/10" />
       </div>
 
       <nav className="scrollbar-thin flex-1 overflow-y-auto px-3 py-4">
@@ -73,7 +69,7 @@ export default function Sidebar({ onNavigate }) {
                       : "hover:bg-white/5 hover:text-white"
                   }`}
                 >
-                  <Icon size={18} className={active ? "drop-shadow-[0_0_6px_rgba(249,115,22,0.6)]" : ""} />
+                  <Icon size={18} />
                   <span>{item.label}</span>
                 </Link>
               </li>
@@ -82,15 +78,13 @@ export default function Sidebar({ onNavigate }) {
         </ul>
       </nav>
 
-      <div className="relative px-3 py-4">
-        <span className="absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/15 to-transparent" />
-
+      <div className="relative border-t border-white/10 px-3 py-4">
         {/* Link status in the rail as well as the topbar: on a wall display the
             header is often the first thing scrolled out of sight. */}
         <div className="mb-3 flex items-center justify-between px-3">
           <span className="hud-label">Link</span>
           <span
-            className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest ${
+            className={`inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide ${
               connected ? "text-green-400" : "text-slate-500"
             }`}
           >

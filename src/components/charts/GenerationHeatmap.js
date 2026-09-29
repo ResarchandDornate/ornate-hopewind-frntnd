@@ -96,7 +96,7 @@ export default function GenerationHeatmap({ aggregates = [] }) {
                     aria-label={`${format(parseISO(day), "dd MMM")} ${String(hour).padStart(2, "0")}:00 — ${formatEnergy(value)}`}
                     title={`${format(parseISO(day), "dd MMM")} ${String(hour).padStart(2, "0")}:00 · ${formatEnergy(value)}`}
                     className={`h-5 flex-1 rounded-[3px] transition ${
-                      isHovered ? "ring-2 ring-slate-900 ring-offset-1 ring-offset-[var(--surface-solid)]" : ""
+                      isHovered ? "ring-2 ring-slate-900 ring-offset-1 ring-offset-(--surface-solid)" : ""
                     }`}
                     style={{
                       background: value > 0 ? sequentialStep(fraction) : CHROME.empty,

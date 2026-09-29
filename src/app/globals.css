@@ -43,56 +43,20 @@
 :root {
   color-scheme: light;
 
-  --background: #f4f7fb;
+  --background: #f5f6f8;
   --foreground: #0f172a;
 
-  /* Glass tokens. The fill is deliberately 72% white: composited over the
-     ambient gradient it lands around #fafbfd, which keeps the chart palette
-     valid against a near-white surface. A more transparent panel would tint
-     the charts and break the colour separation they were validated for. */
-  --glass-fill: rgba(255, 255, 255, 0.72);
-  --glass-fill-strong: rgba(255, 255, 255, 0.86);
-  --glass-border: rgba(255, 255, 255, 0.7);
-  --glass-ring: rgba(15, 23, 42, 0.06);
-  --glass-shadow: 0 8px 32px rgba(15, 23, 42, 0.08);
-  --glass-blur: 16px;
-  /* The top-edge highlight that sells the bevel. Much weaker in dark mode, so
-     it is a token rather than a literal inside .glass. */
-  --glass-inset: inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  --glass-inset-strong: inset 0 1px 0 rgba(255, 255, 255, 0.7);
-  --glass-hover-shadow: 0 12px 40px rgba(15, 23, 42, 0.12);
-  /* A gradient wash laid over the fill. Off in light mode - a white panel with
-     a white sheen is just noise - and carrying the top-lit look in dark. */
-  --glass-sheen: none;
-  --glass-hover-border: rgba(255, 255, 255, 0.9);
-
-  /* Opaque stand-ins used when transparency is unavailable or unwanted. */
+  /* Flat, solid card surfaces. No blur, no translucency: every panel in the
+     app is an opaque card with a plain hairline border and a soft shadow. */
   --surface-solid: #ffffff;
-  --surface-solid-dark: #0d1629;
-  --border-solid: #e2e8f0;
-  --background-flat: #f4f7fb;
-
-  /* Ambient wash stops. */
-  --ambient-warm: rgba(244, 128, 31, 0.16);
-  --ambient-cool: rgba(42, 120, 214, 0.14);
-  --ambient-green: rgba(27, 175, 122, 0.1);
-  --ambient-base: linear-gradient(180deg, #f7f9fc 0%, #eef3f9 100%);
-  /* Engineering grid over the wash. Barely there on white, where the paper
-     already reads as a surface; it does the heavy lifting in dark. */
-  --grid-line: rgba(15, 23, 42, 0.035);
-  --grid-size: 56px;
-  /* `none`, not `transparent`: this lands in a background-image list, and a
-     colour there is invalid and would drop the grid layers with it. */
-  --vignette: none;
-
-  /* Translucent white is the surface idiom across the app (`bg-white/55`,
-     `border-white/70`). Routed through tokens so the dark theme can swap the
-     whole family without every panel needing a `dark:` twin. */
-  --sheet-subtle: rgba(255, 255, 255, 0.55);
-  --sheet: rgba(255, 255, 255, 0.65);
-  --sheet-raised: rgba(255, 255, 255, 0.85);
-  --sheet-hover: rgba(255, 255, 255, 0.6);
-  --hairline: rgba(255, 255, 255, 0.65);
+  /* Sidebar stays a solid dark rail in both themes - the one deliberately
+     "always dark" surface in the app - but a moderate charcoal, not a deep
+     near-black. */
+  --surface-solid-dark: #1a1d24;
+  --border-solid: #e3e6ec;
+  --background-flat: #f5f6f8;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 6px 16px rgba(15, 23, 42, 0.08);
 
   --scrollbar-thumb: rgba(148, 163, 184, 0.15);
   --scrollbar-thumb-hover: rgba(148, 163, 184, 0.5);
@@ -102,11 +66,8 @@
   --selection-bg: rgba(34, 211, 238, 0.28);
   --selection-fg: #0f172a;
 
-  /* Instrument chrome: the halo behind a live status dot, and the bloom on
-     the active nav item. */
-  --dot-glow-strength: 0.22;
-  --nav-active-fill: rgba(249, 115, 22, 0.14);
-  --nav-active-glow: 0 0 18px rgba(249, 115, 22, 0.18);
+  /* Soft tint behind the active nav item - a flat fill, no glow. */
+  --nav-active-fill: rgba(249, 115, 22, 0.12);
 
   /* Chart chrome. Charts draw into SVG, so these are consumed as `var()`
      strings from lib/chartTheme.js rather than as Tailwind utilities - that
@@ -160,25 +121,27 @@
 .dark {
   color-scheme: dark;
 
-  --background: #050810;
-  --foreground: #e6edf8;
+  /* A moderate dark gray, not a near-black "space" theme: comfortable for
+     extended reading, with enough separation from the panels below to still
+     read as a surface rather than a void. */
+  --background: #14161c;
+  --foreground: #e6e8ec;
 
   /* 50-200 are fills, tracks and hairlines. They have to sit just ABOVE the
-     panel (~#0e1626) rather than below it: a divider darker than its surface
-     disappears on a dark theme, where on white it would have read as a line. */
-  --color-slate-50: #16203a;
-  --color-slate-100: #1e2b48;
-  --color-slate-200: #2d3d61;
-  --color-slate-300: #8b9cba;
-  --color-slate-400: #7c8ca8;
-  --color-slate-500: #97a7c2;
-  --color-slate-600: #b1bfd6;
-  --color-slate-700: #cbd6e7;
-  --color-slate-800: #e0e8f4;
-  --color-slate-900: #f2f6fc;
+     panel rather than below it: a divider darker than its surface disappears
+     on a dark theme, where on white it would have read as a line. */
+  --color-slate-50: #1f222b;
+  --color-slate-100: #262a34;
+  --color-slate-200: #343a46;
+  --color-slate-300: #8b93a3;
+  --color-slate-400: #7c8494;
+  --color-slate-500: #97a0b0;
+  --color-slate-600: #b1b8c5;
+  --color-slate-700: #cbd1db;
+  --color-slate-800: #e2e5ea;
+  --color-slate-900: #f3f4f6;
 
-  /* Tinted status chips. Translucent rather than flat so they still read as a
-     tint when they sit on a glass panel over the ambient gradient. */
+  /* Tinted status chips - translucent so they read as a tint on any panel. */
   --color-red-50: rgba(239, 68, 68, 0.15);
   --color-red-100: rgba(239, 68, 68, 0.3);
   --color-red-200: rgba(239, 68, 68, 0.36);
@@ -204,69 +167,38 @@
   --color-indigo-100: rgba(99, 102, 241, 0.3);
   --color-indigo-600: #a5b4fc;
 
-  --color-solid: #f2f6fc;
-  --color-on-solid: #080d18;
+  --color-solid: #eef0f3;
+  --color-on-solid: #14161c;
 
-  /* Panels read as smoked glass over the grid rather than as flat cards: the
-     fill stays translucent so the ambient wash and the grid show through, and
-     the sheen puts a light source above the layout. */
-  --glass-fill: rgba(16, 24, 42, 0.68);
-  --glass-fill-strong: rgba(16, 24, 42, 0.86);
-  --glass-border: rgba(125, 170, 235, 0.14);
-  --glass-ring: rgba(125, 170, 235, 0.12);
-  --glass-shadow: 0 10px 34px rgba(0, 0, 0, 0.5);
-  --glass-inset: inset 0 1px 0 rgba(190, 220, 255, 0.09);
-  --glass-inset-strong: inset 0 1px 0 rgba(190, 220, 255, 0.13);
-  --glass-hover-shadow: 0 14px 44px rgba(0, 0, 0, 0.6);
-  --glass-sheen: linear-gradient(
-    180deg,
-    rgba(125, 170, 235, 0.07) 0%,
-    rgba(125, 170, 235, 0) 42%
-  );
-  --glass-hover-border: rgba(125, 170, 235, 0.28);
+  /* Flat, solid card surfaces - same idiom as the light theme, just darker. */
+  --surface-solid: #1c1f27;
+  /* Sidebar rail: close to the page background rather than a much darker
+     "space" tone, so the whole theme reads as one moderate dark surface. */
+  --surface-solid-dark: #15171c;
+  --border-solid: #2c303a;
+  --background-flat: #14161c;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.35);
 
-  --surface-solid: #101828;
-  --surface-solid-dark: #080e1c;
-  --border-solid: #2d3d61;
-  --background-flat: #050810;
+  --scrollbar-thumb: rgba(255, 255, 255, 0.12);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.24);
 
-  /* Tighter, more saturated aurora than the light theme: on black the wash has
-     to be visible enough to give the glass something to refract. */
-  --ambient-warm: rgba(249, 115, 22, 0.2);
-  --ambient-cool: rgba(34, 211, 238, 0.16);
-  --ambient-green: rgba(27, 175, 122, 0.11);
-  --ambient-base: linear-gradient(180deg, #070c18 0%, #04070e 100%);
-  --grid-line: rgba(125, 170, 235, 0.055);
-  --grid-size: 56px;
-  --vignette: radial-gradient(120% 90% at 50% 0%, transparent 42%, rgba(0, 0, 0, 0.55) 100%);
+  --focus-ring: rgba(56, 189, 248, 0.7);
+  --selection-bg: rgba(56, 189, 248, 0.3);
+  --selection-fg: #f3f4f6;
 
-  --sheet-subtle: rgba(125, 170, 235, 0.05);
-  --sheet: rgba(125, 170, 235, 0.07);
-  --sheet-raised: rgba(16, 24, 42, 0.94);
-  --sheet-hover: rgba(125, 170, 235, 0.1);
-  --hairline: rgba(125, 170, 235, 0.14);
+  --nav-active-fill: rgba(249, 115, 22, 0.14);
 
-  --scrollbar-thumb: rgba(125, 170, 235, 0.16);
-  --scrollbar-thumb-hover: rgba(125, 170, 235, 0.45);
-
-  --focus-ring: rgba(34, 211, 238, 0.75);
-  --selection-bg: rgba(34, 211, 238, 0.3);
-  --selection-fg: #f2f6fc;
-
-  --dot-glow-strength: 0.55;
-  --nav-active-fill: rgba(249, 115, 22, 0.16);
-  --nav-active-glow: 0 0 22px rgba(249, 115, 22, 0.3);
-
-  --chart-grid: rgba(125, 170, 235, 0.09);
-  --chart-axis: rgba(125, 170, 235, 0.22);
-  --chart-muted: #97a7c2;
-  --chart-ink: #f2f6fc;
-  --chart-surface: #101828;
-  --chart-tooltip-bg: rgba(12, 19, 34, 0.95);
-  --chart-tooltip-border: rgba(125, 170, 235, 0.2);
-  --chart-tooltip-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
-  --chart-cursor-fill: rgba(125, 170, 235, 0.07);
-  --chart-empty: rgba(125, 170, 235, 0.05);
+  --chart-grid: rgba(255, 255, 255, 0.08);
+  --chart-axis: rgba(255, 255, 255, 0.18);
+  --chart-muted: #9aa1ad;
+  --chart-ink: #eef0f3;
+  --chart-surface: #1c1f27;
+  --chart-tooltip-bg: rgba(24, 27, 34, 0.97);
+  --chart-tooltip-border: rgba(255, 255, 255, 0.12);
+  --chart-tooltip-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+  --chart-cursor-fill: rgba(255, 255, 255, 0.06);
+  --chart-empty: rgba(255, 255, 255, 0.05);
 
   --heat-0: #101f38;
   --heat-1: #12294a;
@@ -291,41 +223,25 @@
   --color-slate-500: #7c8ca8;
 }
 
-/* Surface utilities written as translucent white. Redefining --color-white
-   globally is not an option - `text-white` on the brand gradient and on the
-   orange avatar has to stay white - so the handful of white *surfaces* are
-   retargeted here instead. */
-.dark .bg-white\/50,
-.dark .bg-white\/55,
-.dark .bg-white\/60,
-.dark .bg-white\/65 {
-  background-color: var(--sheet-subtle);
-}
-.dark .bg-white,
-.dark .bg-white\/80,
-.dark .bg-white\/85,
-/* /90 and /95 are listed even though nothing uses them today: this list fails
-   SILENTLY and in the worst direction. An unlisted step is not "slightly off",
-   it is a full-white panel on the dark theme — which is exactly how a sticky
-   table header shipped white. Covering the whole plausible range costs two
-   selectors and removes the trap. */
-.dark .bg-white\/90,
-.dark .bg-white\/95 {
-  background-color: var(--sheet-raised);
-}
-.dark .hover\:bg-white\/60:hover {
-  background-color: var(--sheet-hover);
-}
-.dark .border-white\/60,
-.dark .border-white\/70 {
-  border-color: var(--hairline);
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, Arial, Helvetica, sans-serif;
   min-height: 100vh;
+}
+
+/* One smooth-colour rule for the whole app, rather than a `transition` utility
+   repeated on every button, row and nav item. This is what makes the light/dark
+   toggle fade instead of snap, and it quietly smooths every hover, active and
+   status-change state at the same time. Layout-affecting properties (size,
+   position, transform) are deliberately left out - this is a colour fade, not
+   a motion effect. */
+*,
+*::before,
+*::after {
+  transition-property: background-color, border-color, color, box-shadow, fill, stroke;
+  transition-timing-function: ease;
+  transition-duration: 0.15s;
 }
 
 ::selection {
@@ -341,113 +257,63 @@ body {
   border-radius: 4px;
 }
 
-/* Ambient wash behind the glass. Without something to refract, a blurred
-   translucent panel just looks like flat grey - the gradient is what makes the
-   effect read as glass at all. Fixed and non-interactive so it never scrolls
-   or swallows clicks. */
-.ambient-bg::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  pointer-events: none;
-  background:
-    radial-gradient(48rem 48rem at 8% -10%, var(--ambient-warm), transparent 60%),
-    radial-gradient(40rem 40rem at 96% 4%, var(--ambient-cool), transparent 62%),
-    radial-gradient(46rem 46rem at 52% 108%, var(--ambient-green), transparent 60%),
-    var(--ambient-base);
-}
-
-/* Engineering grid + vignette, one layer above the wash. The grid is what
-   turns a dark gradient into an instrument surface; the mask fades it out down
-   the page so it never competes with the panels sitting on top of it. */
-.ambient-bg::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px),
-    var(--vignette);
-  background-size: var(--grid-size) var(--grid-size), var(--grid-size) var(--grid-size), cover;
-  mask-image: radial-gradient(140% 100% at 50% 0%, #000 30%, transparent 92%);
-  -webkit-mask-image: radial-gradient(140% 100% at 50% 0%, #000 30%, transparent 92%);
-}
-
+/* Flat, opaque card surface used by every panel in the app - no blur, no
+   translucency, just a solid fill, a hairline border and a soft shadow. */
 .glass {
-  background: var(--glass-sheen), var(--glass-fill);
-  backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(150%);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow), var(--glass-inset);
+  background: var(--surface-solid);
+  border: 1px solid var(--border-solid);
+  box-shadow: var(--shadow-sm);
 }
 
 /* For panels that sit over busier ground, or hold dense text. */
 .glass-strong {
-  background: var(--glass-sheen), var(--glass-fill-strong);
-  backdrop-filter: blur(20px) saturate(160%);
-  -webkit-backdrop-filter: blur(20px) saturate(160%);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--glass-shadow), var(--glass-inset-strong);
+  background: var(--surface-solid);
+  border: 1px solid var(--border-solid);
+  box-shadow: var(--shadow-md);
 }
 
-/* Dark glass for the navigation rail. */
+/* Solid dark rail for the navigation sidebar. */
 .glass-dark {
-  background:
-    linear-gradient(180deg, rgba(125, 170, 235, 0.06) 0%, rgba(125, 170, 235, 0) 30%),
-    rgba(8, 14, 28, 0.88);
-  backdrop-filter: blur(20px) saturate(140%);
-  -webkit-backdrop-filter: blur(20px) saturate(140%);
-  border-right: 1px solid var(--glass-border);
+  background: var(--surface-solid-dark);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .glass-hover {
-  transition: background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 .glass-hover:hover {
-  background: var(--glass-sheen), var(--glass-fill-strong);
-  border-color: var(--glass-hover-border);
-  box-shadow: var(--glass-hover-shadow), var(--glass-inset-strong);
+  box-shadow: var(--shadow-md);
 }
 
 /* ---------------------------------------------------------------------------
-   Instrument primitives.
+   Shared primitives.
 
    These live in @layer components, not unlayered, so a utility on the same
    element still wins: `hud-label text-red-600` has to come out red, and it
    would not if this block outranked the utilities layer.
 --------------------------------------------------------------------------- */
 @layer components {
-  /* Small tracked-out caps used for every field name and section label. A class
-     rather than a utility string because it is five properties that always
-     travel together, repeated on ~40 elements. */
+  /* Small caps used for field names and section labels. */
   .hud-label {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.14em;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
     color: var(--color-slate-500);
   }
 
   /* Numeric readout. Tabular figures stop a live value from reflowing its own
-     width as digits change - the difference between an instrument and a
-     jitter - and Geist Mono is now actually reachable via --font-mono. */
+     width as digits change, and Geist Mono is reachable via --font-mono. */
   .readout {
     font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
   }
 
-  /* Status dot with a halo sized off the dot itself, so it works at any scale.
-     `currentColor` means the halo always matches the colour the badge set. */
   .status-dot {
     position: relative;
     display: inline-block;
     border-radius: 9999px;
-    box-shadow: 0 0 0 3px
-      color-mix(in srgb, currentColor calc(var(--dot-glow-strength) * 100%), transparent);
   }
 
   /* Expanding ring for a genuinely live signal. Only used where something is
@@ -461,10 +327,9 @@ body {
     animation: dot-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
   }
 
-  /* Active navigation item: a lit left rail plus a faint bloom into the row. */
+  /* Active navigation item: a lit left rail plus a soft tint on the row. */
   .nav-active {
     background: var(--nav-active-fill);
-    box-shadow: var(--nav-active-glow);
   }
   .nav-active::before {
     content: "";
@@ -476,64 +341,29 @@ body {
     height: 60%;
     border-radius: 0 2px 2px 0;
     background: var(--color-brand);
-    box-shadow: 0 0 10px 1px var(--color-brand);
   }
 }
 
 @keyframes dot-ping {
   0% {
     transform: scale(1);
-    opacity: 0.7;
+    opacity: 0.6;
   }
   75%,
   100% {
-    transform: scale(2.6);
+    transform: scale(2.4);
     opacity: 0;
   }
 }
 
-/* Fallback: without backdrop-filter the fill must become opaque, or the panel
-   reads as washed-out and the text loses contrast. */
-@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .glass,
-  .glass-strong {
-    background: var(--surface-solid);
-    border-color: var(--border-solid);
-  }
-  .glass-dark {
-    background: var(--surface-solid-dark);
-  }
-}
-
-/* Respect a stated preference for less transparency: drop to solid surfaces
-   rather than merely reducing the blur. */
-@media (prefers-reduced-transparency: reduce) {
-  .glass,
-  .glass-strong {
-    background: var(--surface-solid);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    border-color: var(--border-solid);
-  }
-  .glass-dark {
-    background: var(--surface-solid-dark);
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-  }
-  .ambient-bg::before {
-    background: var(--background-flat);
-  }
-  .ambient-bg::after {
-    display: none;
-  }
-}
-
 @media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.001ms !important;
+  }
   .glass-hover {
     transition: none;
-  }
-  .glass-hover:hover {
-    transform: none;
   }
   /* The ping is decoration on top of a colour that already carries the state,
      so removing it loses no information. */

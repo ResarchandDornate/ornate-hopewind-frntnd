@@ -12,7 +12,7 @@ import { postData } from "@/lib/api";
 import { fetchDbHealth, fetchMe, fetchMqttHealth } from "@/lib/devicesApi";
 import { formatLastSeen } from "@/lib/deviceStatus";
 import { queryKeys } from "@/lib/queryKeys";
-import { extractApiMessage, showError, showSuccess } from "@/lib/toast";
+import { showApiError, showError, showSuccess } from "@/lib/toast";
 
 export default function SettingsPage() {
   const { connected, lastMessageAt, openNav } = useShell();
@@ -161,14 +161,14 @@ function ChangePasswordCard() {
       setNewPassword("");
       setConfirm("");
     } catch (error) {
-      showError(extractApiMessage(error, "Could not change the password."));
+      showApiError(error, "Could not change the password.");
     } finally {
       setSaving(false);
     }
   };
 
   const inputClass =
-    "w-full rounded-xl border border-white/70 bg-white/55 px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-orange-400";
+    "w-full rounded-lg border border-(--border-solid) bg-(--surface-solid) px-4 py-2.5 text-sm text-slate-900 outline-none focus:border-orange-400";
 
   return (
     <Card title="Change password" subtitle="You will stay signed in on this device">

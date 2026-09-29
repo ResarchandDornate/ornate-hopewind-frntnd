@@ -16,6 +16,7 @@ import { format, parseISO } from "date-fns";
 import { EmptyState } from "@/components/ui";
 import { CHROME, SERIES_COLORS, axisProps, gridProps, tooltipProps } from "@/lib/chartTheme";
 import { formatEnergy } from "@/lib/format";
+import ChartTooltip from "@/components/charts/ChartTooltip";
 
 const LABEL_FORMAT = { day: "dd MMM", month: "MMM yyyy", year: "yyyy" };
 
@@ -64,6 +65,7 @@ export default function EnergyBarChart({ points = [], period = "day", height = 3
         <YAxis {...axisProps} width={68} tickFormatter={(value) => formatEnergy(value, 0)} />
         <Tooltip
           {...tooltipProps}
+          content={<ChartTooltip />}
           cursor={{ fill: CHROME.cursorFill }}
           formatter={(value) => [formatEnergy(value), "Energy"]}
         />

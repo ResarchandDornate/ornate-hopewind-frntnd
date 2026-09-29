@@ -21,7 +21,7 @@ export function ThemeToggle({ className = "" }) {
       onClick={toggleTheme}
       // Before mount the stored preference is unknown, so the icon would
       // hydrate wrong and visibly swap. Reserve the space and fade it in.
-      className={`rounded-xl p-2 text-slate-500 transition hover:bg-white/60 hover:text-slate-700 ${
+      className={`rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 ${
         mounted ? "" : "invisible"
       } ${className}`}
       aria-label={`Switch to ${next} theme`}
@@ -50,7 +50,7 @@ export function ThemePicker() {
     <div
       role="radiogroup"
       aria-label="Colour theme"
-      className="inline-flex rounded-xl border border-white/60 bg-white/50 p-1 backdrop-blur"
+      className="inline-flex rounded-lg bg-slate-100 p-1"
     >
       {OPTIONS.map((option) => {
         const Icon = option.icon;
@@ -64,7 +64,7 @@ export function ThemePicker() {
             onClick={() => setPreference(option.value)}
             className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition ${
               active
-                ? "bg-white text-slate-900 shadow-sm"
+                ? "bg-(--surface-solid) text-slate-900 shadow-sm"
                 : "text-slate-500 hover:text-slate-700"
             }`}
           >

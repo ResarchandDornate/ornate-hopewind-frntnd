@@ -228,11 +228,7 @@ export default function ReadingsTable({ deviceId, unitId = null, serialNumber = 
               far wider than a laptop screen, and the page must not scroll. */}
           <div className="scrollbar-thin max-h-[36rem] overflow-auto">
             <table className="w-full text-sm">
-              {/* bg-white/85, not /90: globals.css retargets white SURFACES to
-                  the dark sheet by an explicit list of opacity steps, and only
-                  /80 and /85 are on it. An unlisted step stays literally white
-                  and the header blinds you on the dark theme. */}
-              <thead className="sticky top-0 z-10 bg-white/85 backdrop-blur-md">
+              <thead className="sticky top-0 z-10 bg-(--surface-solid)">
                 <tr className="border-b border-slate-200">
                   <Th>Time</Th>
                   {showInverter && <Th>Inverter</Th>}

@@ -6,10 +6,9 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Eye, EyeOff, Loader2, Lock, Mail, Phone, ShieldCheck, User } from "lucide-react";
 
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { CornerMarks } from "@/components/ui";
 import { postData } from "@/lib/api";
 import { storeSession } from "@/lib/auth";
-import { extractApiMessage, showError, showSuccess } from "@/lib/toast";
+import { showApiError, showError, showSuccess } from "@/lib/toast";
 
 /**
  * Two-step registration, matching the backend's flow: signup creates an
@@ -48,7 +47,7 @@ export default function SignupPage() {
       showSuccess("Account created — check your email for the OTP");
       setStep("otp");
     } catch (error) {
-      showError(extractApiMessage(error, "Could not create the account."));
+      showApiError(error, "Could not create the account.");
     } finally {
       setLoading(false);
     }
@@ -70,7 +69,7 @@ export default function SignupPage() {
       showSuccess("Account verified");
       router.replace("/dashboard");
     } catch (error) {
-      showError(extractApiMessage(error, "Verification failed."));
+      showApiError(error, "Verification failed.");
     } finally {
       setLoading(false);
     }
@@ -81,12 +80,12 @@ export default function SignupPage() {
       await postData("/auth/send-otp/", { email: form.email });
       showSuccess("A new code is on its way");
     } catch (error) {
-      showError(extractApiMessage(error, "Could not resend the code."));
+      showApiError(error, "Could not resend the code.");
     }
   };
 
   const inputWrap =
-    "mb-4 flex items-center rounded-xl border border-white/70 bg-white/55 px-4 transition focus-within:border-orange-400 focus-within:shadow-[0_0_0_3px_rgba(249,115,22,0.15)]";
+    "mb-4 flex items-center rounded-lg border border-(--border-solid) bg-(--surface-solid) px-4 transition focus-within:border-orange-400";
   const inputClass = "ml-3 flex-1 bg-transparent py-3 text-slate-800 outline-none";
 
   return (
@@ -95,17 +94,15 @@ export default function SignupPage() {
         <ThemeToggle />
       </div>
 
-      <div className="glass-strong relative w-full max-w-md overflow-hidden rounded-3xl p-8">
-        <span
-          aria-hidden
-          className="absolute inset-x-8 top-0 h-px bg-linear-to-r from-transparent via-brand to-transparent"
-        />
-        <CornerMarks />
-
+      <div className="glass-strong w-full max-w-md rounded-2xl p-8">
         <div className="mb-8 flex flex-col items-center text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/ornatelogo.png" alt="Ornate Solar" className="mb-4 h-14 w-auto object-contain" />
-          <h1 className="text-3xl font-bold tracking-tight text-slate-800">
+          <img
+            src="/ornatelogo.png"
+            alt="Ornate Solar"
+            className="mb-4 h-14 w-auto object-contain invert dark:invert-0"
+          />
+          <h1 className="text-2xl font-semibold tracking-tight text-slate-800">
             {step === "details" ? "Create Account" : "Verify Email"}
           </h1>
           <p className="hud-label mt-2">
@@ -190,14 +187,14 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="mt-2 flex w-full items-center justify-center rounded-xl bg-linear-to-r from-orange-500 to-red-600 py-4 text-base font-bold uppercase tracking-[0.12em] text-white shadow-[0_8px_28px_-8px_rgba(249,115,22,0.8)] transition hover:opacity-95 disabled:opacity-60 dark:to-red-500"
+              className="mt-2 flex w-full items-center justify-center rounded-lg bg-brand py-3 text-sm font-semibold text-on-brand transition hover:opacity-90 disabled:opacity-60"
             >
-              {loading ? <Loader2 className="animate-spin" /> : "Create Account"}
+              {loading ? <Loader2 className="animate-spin" size={18} /> : "Create Account"}
             </button>
 
             <p className="mt-6 text-center text-sm text-slate-500">
               Already registered?{" "}
-              <Link href="/login" className="font-bold text-orange-500 hover:text-orange-600">
+              <Link href="/login" className="font-semibold text-orange-500 hover:text-orange-600">
                 Sign in
               </Link>
             </p>
@@ -212,16 +209,16 @@ export default function SignupPage() {
                 placeholder="6-digit code"
                 inputMode="numeric"
                 autoComplete="one-time-code"
-                className={`${inputClass} readout text-lg tracking-[0.4em]`}
+                className={`${inputClass} readout text-lg tracking-[0.2em]`}
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="flex w-full items-center justify-center rounded-xl bg-linear-to-r from-orange-500 to-red-600 py-4 text-base font-bold uppercase tracking-[0.12em] text-white shadow-[0_8px_28px_-8px_rgba(249,115,22,0.8)] transition hover:opacity-95 disabled:opacity-60 dark:to-red-500"
+              className="flex w-full items-center justify-center rounded-lg bg-brand py-3 text-sm font-semibold text-on-brand transition hover:opacity-90 disabled:opacity-60"
             >
-              {loading ? <Loader2 className="animate-spin" /> : "Verify & Continue"}
+              {loading ? <Loader2 className="animate-spin" size={18} /> : "Verify & Continue"}
             </button>
 
             <div className="mt-6 flex items-center justify-between text-sm">
@@ -236,7 +233,7 @@ export default function SignupPage() {
               <button
                 type="button"
                 onClick={handleResend}
-                className="font-bold text-orange-500 hover:text-orange-600"
+                className="font-semibold text-orange-500 hover:text-orange-600"
               >
                 Resend code
               </button>
